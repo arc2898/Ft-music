@@ -1,13 +1,11 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:ft_music/screens/screen/home_views/setting_views/appui_setting.dart';
 import 'package:ft_music/screens/screen/home_views/setting_views/local_music_setting.dart';
-import 'package:ft_music/screens/screen/home_views/setting_views/plugin_defaults_setting.dart';
 import 'package:ft_music/screens/screen/home_views/setting_views/storage_setting.dart';
 import 'package:ft_music/screens/screen/home_views/setting_views/country_setting.dart';
 import 'package:ft_music/screens/screen/home_views/setting_views/download_setting.dart';
 import 'package:ft_music/screens/screen/home_views/setting_views/lastfm_setting.dart';
 import 'package:ft_music/screens/screen/home_views/setting_views/player_setting.dart';
-import 'package:ft_music/screens/screen/plugin_manager_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:ft_music/core/theme/app_theme.dart';
 import 'package:ft_music/l10n/app_localizations.dart';
@@ -42,33 +40,7 @@ class SettingsView extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             children: [
-              // ── Group 1: Core App & Plugins ──
-              _SettingsSection(
-                children: [
-                  _SettingsTile(
-                    title: AppLocalizations.of(context)!.settingsPlugins,
-                    subtitle:
-                        AppLocalizations.of(context)!.settingsPluginsSubtitle,
-                    icon: Icons.extension_rounded,
-                    iconColor: Default_Theme.accentColor2,
-                    isHighlightIcon:
-                        true, // Gives the accent color a bit more pop
-                    onTap: () =>
-                        _navigate(context, const PluginManagerScreen()),
-                  ),
-                  _SettingsTile(
-                    title: AppLocalizations.of(context)!.settingsPluginDefaults,
-                    subtitle: AppLocalizations.of(context)!
-                        .settingsPluginDefaultsSubtitle,
-                    icon: Icons.settings_rounded,
-                    iconColor: Default_Theme.accentColor2,
-                    onTap: () =>
-                        _navigate(context, const PluginDefaultsSettings()),
-                  ),
-                ],
-              ),
-
-              // ── Group 2: Playback & Media ──
+              // ── Group 1: Playback & Media ──
               _SettingsSection(
                 children: [
                   _SettingsTile(
@@ -98,7 +70,7 @@ class SettingsView extends StatelessWidget {
                 ],
               ),
 
-              // ── Group 3: Preferences & Integrations ──
+              // ── Group 2: Preferences & Integrations ──
               _SettingsSection(
                 children: [
                   _SettingsTile(

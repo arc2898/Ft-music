@@ -126,7 +126,7 @@ class AppUISettings extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                'Pick a lane. FT-music will search it only when you ask.',
+                'Choose a category to search across all available sources.',
                 style: const TextStyle(
                   color: Default_Theme.primaryColor2,
                   fontSize: 14,
@@ -138,31 +138,7 @@ class AppUISettings extends StatelessWidget {
                 _CategoryGroupCard(group: group),
                 const SizedBox(height: 16),
               ],
-              SettingSectionHeader(label: l10n.settingsPluginDefaults),
-              const SettingCard(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Icon(Icons.speed_rounded,
-                            color: Default_Theme.accentColor2),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            'Spotify is preferred when a compatible Spotify plugin is installed. Otherwise FT-music keeps the fastest available resolver.',
-                            style: TextStyle(
-                              color: Default_Theme.primaryColor2,
-                              fontSize: 13,
-                              height: 1.35,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+
             ],
           );
         },

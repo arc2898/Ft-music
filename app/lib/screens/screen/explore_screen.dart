@@ -3,7 +3,6 @@ import 'package:ft_music/blocs/explore/cubit/explore_cubits.dart';
 import 'package:ft_music/blocs/internet_connectivity/cubit/connectivity_cubit.dart';
 import 'package:ft_music/blocs/lastdotfm/lastdotfm_cubit.dart';
 import 'package:ft_music/blocs/media_player/bloomee_player_cubit.dart';
-import 'package:ft_music/blocs/notification/notification_cubit.dart';
 import 'package:ft_music/blocs/settings_cubit/cubit/settings_cubit.dart';
 import 'package:ft_music/core/di/service_locator.dart';
 import 'package:ft_music/core/models/exported.dart';
@@ -18,7 +17,6 @@ import 'package:ft_music/screens/widgets/more_bottom_sheet.dart';
 import 'package:ft_music/screens/widgets/sign_board_widget.dart';
 import 'package:ft_music/screens/widgets/song_tile.dart';
 import 'package:flutter/material.dart';
-import 'package:ft_music/screens/screen/home_views/notification_view.dart';
 import 'package:ft_music/screens/screen/home_views/setting_view.dart';
 import 'package:ft_music/screens/screen/home_views/timer_view.dart';
 import 'package:ft_music/core/theme/app_theme.dart';
@@ -27,7 +25,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../widgets/horizontal_card_view.dart';
 import '../widgets/tab_list_widget.dart';
 import '../widgets/home_category_carousel.dart';
-import 'package:badges/badges.dart' as badges;
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -178,7 +175,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
               );
             },
             child: CustomScrollView(
-              shrinkWrap: true,
               physics: const ClampingScrollPhysics(),
               slivers: [
                 const CustomDiscoverBar(),
@@ -427,32 +423,32 @@ class _HomeSectionsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      shrinkWrap: true,
-      itemExtent: 275,
-      padding: const EdgeInsets.only(top: 0),
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: sections.length,
-      itemBuilder: (context, index) {
-        final section = sections[index];
-        return HorizontalCardView(
-          section: section,
-          pluginId: contentBloc.state.activePluginId ?? '',
-          canLoadMore: section.moreLink != null,
-          isLoadingMore: state.isHomeSectionLoading(section.id),
-          onLoadMore: section.moreLink == null
-              ? null
-              : () {
-                  contentBloc.add(
-                    LoadMoreHomeSectionItems(
-                      pluginId: contentBloc.state.activePluginId ?? '',
-                      sectionId: section.id,
-                      moreLink: section.moreLink!,
-                    ),
-                  );
-                },
-        );
-      },
+    final pluginId = contentBloc.state.activePluginId ?? '';
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final section in sections)
+          SizedBox(
+            height: 275,
+            child: HorizontalCardView(
+              section: section,
+              pluginId: pluginId,
+              canLoadMore: section.moreLink != null,
+              isLoadingMore: state.isHomeSectionLoading(section.id),
+              onLoadMore: section.moreLink == null
+                  ? null
+                  : () {
+                      contentBloc.add(
+                        LoadMoreHomeSectionItems(
+                          pluginId: pluginId,
+                          sectionId: section.id,
+                          moreLink: section.moreLink!,
+                        ),
+                      );
+                    },
+            ),
+          ),
+      ],
     );
   }
 }
@@ -471,7 +467,6 @@ class CustomDiscoverBar extends StatelessWidget {
         children: [
           const _FTMusicBrand(),
           const Spacer(),
-          const NotificationIcon(),
           const TimerIcon(),
           const SettingsIcon(),
         ],
@@ -509,74 +504,6 @@ class _FTMusicBrand extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class NotificationIcon extends StatelessWidget {
-  const NotificationIcon({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<NotificationCubit, NotificationState>(
-      builder: (context, state) {
-        if (state is NotificationInitial || state.notifications.isEmpty) {
-          return IconButton(
-            padding: const EdgeInsets.all(5),
-            constraints: const BoxConstraints(),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const NotificationView(),
-                ),
-              );
-            },
-            icon: const Icon(
-              Icons.notifications_none_rounded,
-              color: Default_Theme.primaryColor1,
-              size: 30.0,
-            ),
-          );
-        }
-        return badges.Badge(
-          badgeContent: Padding(
-            padding: const EdgeInsets.all(1.5),
-            child: Text(
-              state.notifications.length.toString(),
-              style: Default_Theme.primaryTextStyle.merge(
-                const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: Default_Theme.primaryColor2,
-                ),
-              ),
-            ),
-          ),
-          badgeStyle: const badges.BadgeStyle(
-            badgeColor: Default_Theme.accentColor2,
-            shape: badges.BadgeShape.circle,
-          ),
-          position: badges.BadgePosition.topEnd(top: -10, end: -5),
-          child: IconButton(
-            padding: const EdgeInsets.all(5),
-            constraints: const BoxConstraints(),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const NotificationView(),
-                ),
-              );
-            },
-            icon: const Icon(
-              Icons.notifications_none_rounded,
-              color: Default_Theme.primaryColor1,
-              size: 30.0,
-            ),
-          ),
-        );
-      },
     );
   }
 }
