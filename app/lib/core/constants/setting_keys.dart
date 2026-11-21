@@ -8,6 +8,7 @@ class SettingKeys {
 
   // ── App behaviour ───────────────────────────────────────────────────────────
   static const String autoSlideCharts = "auto_slide_charts";
+  static const String themeMode = "themeMode";
 
   // ── Playback ────────────────────────────────────────────────────────────────
   static const String strmQuality = "streamQuality";

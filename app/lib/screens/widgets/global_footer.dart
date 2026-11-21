@@ -61,8 +61,8 @@ class GlobalFooter extends StatelessWidget {
             await _handleHardwareBackPress(context);
           },
           child: Scaffold(
-            backgroundColor: Default_Theme.themeColor,
-            drawerScrimColor: Default_Theme.themeColor,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            drawerScrimColor: Theme.of(context).colorScheme.scrim.withValues(alpha: .28),
             body: isMobile
                 ? _AnimatedPageView(navigationShell: navigationShell)
                 : Row(
@@ -209,7 +209,7 @@ class VerticalNavBar extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return NavigationRail(
-      backgroundColor: Default_Theme.themeColor.withValues(alpha: 0.3),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       destinations: [
         NavigationRailDestination(
             icon: const Icon(Icons.home_rounded), label: Text(l10n.navHome)),
@@ -230,9 +230,10 @@ class VerticalNavBar extends StatelessWidget {
       minWidth: 70,
       onDestinationSelected: navigationShell.goBranch,
       groupAlignment: 0.0,
-      unselectedIconTheme:
-          const IconThemeData(color: Default_Theme.primaryColor2),
-      indicatorColor: Default_Theme.accentColor2,
+      unselectedIconTheme: IconThemeData(
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+      indicatorColor: Theme.of(context).colorScheme.primary,
       indicatorShape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(15)),
       ),
@@ -259,10 +260,10 @@ class HorizontalNavBar extends StatelessWidget {
       height: 68,
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: Default_Theme.surfaceElevated,
+        color: Theme.of(context).colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: Default_Theme.primaryColor1.withValues(alpha: .06),
+          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: .5),
         ),
         boxShadow: const [
           BoxShadow(
@@ -304,9 +305,8 @@ class _BottomNavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected
-        ? const Color(0xFF182014)
-        : Default_Theme.primaryColor2.withValues(alpha: .82);
+    final colors = Theme.of(context).colorScheme;
+    final color = selected ? colors.onPrimary : colors.onSurfaceVariant;
     return Semantics(
       button: true,
       selected: selected,
@@ -319,7 +319,7 @@ class _BottomNavItem extends StatelessWidget {
           curve: Curves.easeOutCubic,
           margin: const EdgeInsets.symmetric(horizontal: 2),
           decoration: BoxDecoration(
-            color: selected ? Default_Theme.accentColor2 : Colors.transparent,
+            color: selected ? Theme.of(context).colorScheme.primary : Colors.transparent,
             borderRadius: BorderRadius.circular(18),
           ),
           child: Column(
@@ -333,7 +333,7 @@ class _BottomNavItem extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: color,
-                  fontFamily: 'Gilroy',
+                  fontFamily: 'ReThink-Sans',
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                 ),

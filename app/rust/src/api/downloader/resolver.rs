@@ -13,6 +13,7 @@ use crate::api::downloader::utils::{
 use crate::api::plugin::commands::{ContentResolverCommand, PluginRequest, PluginResponse};
 use crate::api::plugin::models::{Quality, StreamSource};
 use crate::api::plugin::plugin::PluginManager;
+use crate::api::plugin::types::PluginType;
 
 /// Seconds before a stream's stated expiry at which we consider it too close to
 /// use. This prevents starting a download with a URL that will expire mid-flight.
@@ -32,6 +33,14 @@ pub fn is_stream_usable(stream: &StreamSource) -> bool {
         }
     }
     true
+}
+
+/// A source is eligible for offline saving only when its installed content
+/// resolver manifest explicitly declares this capability.
+fn plugin_allows_offline_download(capabilities: &[String]) -> bool {
+    capabilities
+        .iter()
+        .any(|capability| capability.trim().eq_ignore_ascii_case("offline_download"))
 }
 
 /// Pick the best stream from `streams` given a quality preference string.
@@ -84,6 +93,22 @@ pub async fn resolve_stream(
 
     // 3. Fetch from plugin manager (this is async and may take time).
     let stream = if let Some((plugin_id, local_id)) = split_media_id(&track.id) {
+        let plugin_info = plugin_manager
+            .get_available_plugins()
+            .await
+            .into_iter()
+            .find(|plugin| {
+                plugin.id() == plugin_id
+                    && plugin.plugin_type == PluginType::ContentResolver
+            })
+            .ok_or_else(|| format!("Content resolver '{plugin_id}' is not installed"))?;
+
+        if !plugin_allows_offline_download(&plugin_info.manifest.capabilities) {
+            return Err(format!(
+                "Content resolver '{plugin_id}' has not explicitly authorized offline downloads. Its manifest must declare the 'offline_download' capability."
+            ));
+        }
+
         let response = plugin_manager
             .handle_plugin_request(
                 &plugin_id,
@@ -101,21 +126,11 @@ pub async fn resolve_stream(
 
         select_best_stream(&streams, &preference)
             .ok_or_else(|| format!("No usable streams returned for '{}'", track.title))?
-    } else if let Some(url) = track.url.clone() {
-        // Direct URL track (not a plugin-managed ID).
-        if url.starts_with("http://") || url.starts_with("https://") {
-            StreamSource {
-                url: url.clone(),
-                quality: Quality::High,
-                format: guess_extension_from_url(None, &url),
-                headers: None,
-                expires_at: None,
-            }
-        } else {
-            return Err(format!("Invalid direct URL for '{}'", track.title));
-        }
     } else {
-        return Err(format!("No stream source available for '{}'", track.title));
+        return Err(format!(
+            "Offline saving for '{}' requires a content resolver that declares the 'offline_download' capability.",
+            track.title
+        ));
     };
 
     // 4. Check for cancellation again before mutating the task (avoids a race
@@ -150,3 +165,26 @@ pub async fn resolve_stream(
     Ok(stream)
 }
 
+
+
+#[cfg(test)]
+mod offline_download_policy_tests {
+    use super::plugin_allows_offline_download;
+
+    #[test]
+    fn requires_explicit_offline_download_capability() {
+        assert!(plugin_allows_offline_download(&[
+            "charts".to_string(),
+            "offline_download".to_string(),
+        ]));
+        assert!(!plugin_allows_offline_download(&["streaming".to_string()]));
+        assert!(!plugin_allows_offline_download(&[]));
+    }
+
+    #[test]
+    fn capability_matching_is_trimmed_and_case_insensitive() {
+        assert!(plugin_allows_offline_download(&[
+            " Offline_Download ".to_string(),
+        ]));
+    }
+}

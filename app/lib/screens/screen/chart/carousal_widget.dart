@@ -14,7 +14,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-/// Chart carousel widget that displays charts from loaded chart provider plugins.
+/// Home carousel for chart-provider artwork. Chart details are fetched only
+/// when a card is opened, keeping the initial home load lightweight.
 class CaraouselWidget extends StatefulWidget {
   const CaraouselWidget({super.key});
 
@@ -24,7 +25,7 @@ class CaraouselWidget extends StatefulWidget {
 
 class _CaraouselWidgetState extends State<CaraouselWidget> {
   late final ChartBloc _chartBloc;
-  ValueNotifier<bool> autoSlideCharts = ValueNotifier(true);
+  final ValueNotifier<bool> autoSlideCharts = ValueNotifier(true);
   StreamSubscription<SettingsState>? _settingsSub;
 
   @override
@@ -41,8 +42,7 @@ class _CaraouselWidgetState extends State<CaraouselWidget> {
   }
 
   void _loadChartsFromPlugin() {
-    final chartProviders =
-        context.read<PluginBloc>().state.loadedChartProviders;
+    final chartProviders = context.read<PluginBloc>().state.loadedChartProviders;
     if (chartProviders.isNotEmpty) {
       final pluginId = chartProviders.first.manifest.id;
       log('Loading charts from plugin: $pluginId', name: 'ChartCarousel');
@@ -63,91 +63,107 @@ class _CaraouselWidgetState extends State<CaraouselWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ChartBloc, ChartState>(
-      bloc: _chartBloc,
-      listenWhen: (previous, current) =>
-          previous.chartsStatus != ChartStatus.loaded &&
-          current.chartsStatus == ChartStatus.loaded,
-      listener: (_, __) {
-        // Chart details are fetched only when a user opens a chart. This
-        // prevents the home screen from downloading every chart on startup.
-      },
-      child: BlocBuilder<PluginBloc, PluginState>(
-        builder: (context, pluginState) {
-          if (pluginState.loadedChartProviders.isEmpty) {
-            _chartBloc.add(const ClearCharts());
-          } else if (_chartBloc.state.chartsStatus == ChartStatus.initial) {
-            _loadChartsFromPlugin();
-          }
-          return BlocBuilder<ChartBloc, ChartState>(
-            bloc: _chartBloc,
-            builder: (context, chartState) {
-              if (chartState.charts.isEmpty) return const SizedBox.shrink();
+    final colors = Theme.of(context).colorScheme;
+    return BlocBuilder<PluginBloc, PluginState>(
+      builder: (context, pluginState) {
+        if (pluginState.loadedChartProviders.isEmpty) {
+          _chartBloc.add(const ClearCharts());
+        } else if (_chartBloc.state.chartsStatus == ChartStatus.initial) {
+          _loadChartsFromPlugin();
+        }
 
-              final settingsState = context.watch<SettingsCubit>().state;
-              final visibleCharts = chartState.charts
-                  .where((c) => settingsState.chartMap[c.title] ?? true)
-                  .toList();
+        return BlocBuilder<ChartBloc, ChartState>(
+          bloc: _chartBloc,
+          builder: (context, chartState) {
+            final settingsState = context.watch<SettingsCubit>().state;
+            final visibleCharts = chartState.charts
+                .where((chart) => settingsState.chartMap[chart.title] ?? true)
+                .toList();
 
-              if (visibleCharts.isEmpty) return const SizedBox.shrink();
+            if (visibleCharts.isEmpty) return const SizedBox.shrink();
 
-              return Padding(
-                padding: const EdgeInsets.only(top: 20),
-                child: ValueListenableBuilder<bool>(
-                  valueListenable: autoSlideCharts,
-                  builder: (context, autoPlay, child) {
-                    return CarouselSlider.builder(
-                      itemCount: visibleCharts.length,
-                      itemBuilder: (context, index, realIndex) {
-                        final chart = visibleCharts[index];
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ChartScreen(
-                                  pluginId:
-                                      _chartBloc.state.activePluginId ?? '',
-                                  chartId: chart.id,
-                                  chartTitle: chart.title,
-                                ),
+            final isCompact = ResponsiveBreakpoints.of(context).isMobile ||
+                ResponsiveBreakpoints.of(context).isTablet;
+
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(18, 20, 18, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Charts for you',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: colors.onSurface,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -.3,
+                        ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    'Fresh artwork from your chart sources',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                  ),
+                  const SizedBox(height: 10),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: autoSlideCharts,
+                    builder: (context, autoPlay, child) {
+                      return CarouselSlider.builder(
+                        itemCount: visibleCharts.length,
+                        itemBuilder: (context, index, realIndex) {
+                          final chart = visibleCharts[index];
+                          return Semantics(
+                            button: true,
+                            label: 'Open ${chart.title} chart',
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(18),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ChartScreen(
+                                      pluginId: _chartBloc.state.activePluginId ?? '',
+                                      chartId: chart.id,
+                                      chartTitle: chart.title,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: ChartWidget(
+                                chart: chart,
+                                pluginId: _chartBloc.state.activePluginId ?? '',
                               ),
-                            );
-                          },
-                          child: ChartWidget(
-                            chart: chart,
-                            pluginId: _chartBloc.state.activePluginId ?? '',
-                          ),
-                        );
-                      },
-                      options: CarouselOptions(
-                        height: ResponsiveBreakpoints.of(context).isMobile ||
-                                ResponsiveBreakpoints.of(context).isTablet
-                            ? MediaQuery.of(context).size.height * 0.36
-                            : 250,
-                        viewportFraction:
-                            ResponsiveBreakpoints.of(context).isMobile
-                                ? 0.65
-                                : ResponsiveBreakpoints.of(context).isTablet
-                                    ? 0.40
-                                    : 0.30,
-                        autoPlay: autoPlay,
-                        autoPlayInterval: const Duration(milliseconds: 2500),
-                        enlargeFactor: 0.2,
-                        initialPage: 0,
-                        pauseAutoPlayOnTouch: true,
-                        padEnds: true,
-                        enlargeCenterPage:
-                            ResponsiveBreakpoints.of(context).isMobile,
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
-          );
-        },
-      ),
+                            ),
+                          );
+                        },
+                        options: CarouselOptions(
+                          height: isCompact
+                              ? MediaQuery.sizeOf(context).height * .32
+                              : 250,
+                          viewportFraction: ResponsiveBreakpoints.of(context).isMobile
+                              ? .68
+                              : ResponsiveBreakpoints.of(context).isTablet
+                                  ? .42
+                                  : .30,
+                          autoPlay: autoPlay && visibleCharts.length > 1,
+                          autoPlayInterval: const Duration(seconds: 4),
+                          enableInfiniteScroll: visibleCharts.length > 1,
+                          enlargeFactor: .14,
+                          initialPage: 0,
+                          pauseAutoPlayOnTouch: true,
+                          padEnds: true,
+                          enlargeCenterPage: ResponsiveBreakpoints.of(context).isMobile,
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

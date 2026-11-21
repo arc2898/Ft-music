@@ -2,23 +2,34 @@
   "product": "FT-music",
   "tagline": "Your music, openly connected",
   "palette": {
-    "primary": "#7C3AED",
-    "primary_dark": "#5B21B6",
-    "accent": "#22D3EE",
-    "accent_light": "#67E8F9",
-    "background": "#0B1020",
-    "surface": "#151B2E",
-    "surface_elevated": "#202943",
-    "surface_soft": "#2D3754",
-    "surface_highlight": "#3D4A6B",
-    "text_primary": "#F8FAFC",
-    "text_secondary": "#A5B4CC",
-    "success": "#34D399",
+    "primary": "#A3E635",
+    "primary_dark": "#5C8516",
+    "accent": "#B7F36A",
+    "accent_light": "#D6FFA1",
+    "background": "#0B1008",
+    "surface": "#151D10",
+    "surface_elevated": "#1F2A17",
+    "surface_soft": "#2B3A20",
+    "surface_highlight": "#41552C",
+    "text_primary": "#F5F9EE",
+    "text_secondary": "#B8C7A6",
+    "success": "#4ADE80",
     "warning": "#FBBF24",
     "danger": "#FB7185"
   },
+  "light_palette": {
+    "primary": "#5C8516",
+    "accent": "#76A72A",
+    "background": "#F7FAF2",
+    "surface": "#FFFFFF",
+    "surface_elevated": "#EEF4E7",
+    "surface_soft": "#E3EBD9",
+    "surface_highlight": "#C7D6B6",
+    "text_primary": "#1D2916",
+    "text_secondary": "#58674D"
+  },
   "typography": {
-    "interface": "Unageo",
+    "interface": "ReThink-Sans",
     "technical": "CodePro"
   },
   "shape": {
@@ -33,7 +44,7 @@
     "standard_ms": 260
   },
   "logo": {
-    "mark": "two overlapping sound-wave arcs forming an F",
+    "mark": "a bold lime F built from a vertical stem and sound-wave bars",
     "wordmark": "FT-music",
     "clear_space": "one mark width"
   }

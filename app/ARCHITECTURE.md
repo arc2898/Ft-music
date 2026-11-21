@@ -361,3 +361,8 @@ ServiceLocator.pluginService  // PluginService
 - **Deep links**: handled by GoRouter redirect logic.
 - **Navigator key**: `GlobalKey<NavigatorState>` passed to `GlobalEventListener` for out-of-tree navigation (update dialogs, changelog screen pushed from within a cubit listener).
 
+
+
+## Offline download authorization
+
+Offline saving is opt-in per content-resolver plugin. The installed plugin manifest must declare `capabilities: ["offline_download"]`; Dart checks this before queueing and the Rust resolver enforces it again before calling `GetStreams`. Direct URLs and local-import IDs are not accepted by the download resolver. Mobile downloads use app-scoped storage; desktop uses the configured writable folder. See [offline-downloads.md](docs/offline-downloads.md).

@@ -164,6 +164,14 @@ class SettingsCubit extends Cubit<SettingsState> {
             defaultValue: ''),
         SettingKeys.suggestionPluginId,
       ),
+      // [26] themeMode
+      _readSetting(
+        () => _settingsRepo.getSettingStr(
+          SettingKeys.themeMode,
+          defaultValue: 'dark',
+        ),
+        SettingKeys.themeMode,
+      ),
     ]);
 
     // Normalize stream quality labels.
@@ -274,6 +282,7 @@ class SettingsCubit extends Cubit<SettingsState> {
       resolverPriority: resolverPriority,
       lyricsPriority: lyricsPriority,
       suggestionPluginId: (results[25] as String?) ?? '',
+      themeMode: _normalizeThemeMode(results[26] as String?),
     ));
   }
 
@@ -388,6 +397,23 @@ class SettingsCubit extends Cubit<SettingsState> {
   void setAutoSlideCharts(bool v) {
     _settingsRepo.putSettingBool(SettingKeys.autoSlideCharts, v);
     emit(state.copyWith(autoSlideCharts: v));
+  }
+
+  String _normalizeThemeMode(String? value) {
+    switch (value?.trim().toLowerCase()) {
+      case 'light':
+        return 'light';
+      case 'system':
+        return 'system';
+      default:
+        return 'dark';
+    }
+  }
+
+  Future<void> setThemeMode(String value) async {
+    final normalized = _normalizeThemeMode(value);
+    await _settingsRepo.putSettingStr(SettingKeys.themeMode, normalized);
+    if (!isClosed) emit(state.copyWith(themeMode: normalized));
   }
 
   void setDownPath(String v) {

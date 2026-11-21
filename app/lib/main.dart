@@ -170,7 +170,9 @@ class _StartupApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: Default_Theme().defaultThemeData,
+      theme: Default_Theme().lightThemeData,
+      darkTheme: Default_Theme().defaultThemeData,
+      themeMode: ThemeMode.dark,
       home: FutureBuilder<void>(
         future: initialization,
         builder: (context, snapshot) {
@@ -555,7 +557,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       ),
                       scaffoldMessengerKey: SnackbarService.messengerKey,
                       routerConfig: GlobalRoutes.globalRouter,
-                      theme: Default_Theme().defaultThemeData,
+                      theme: Default_Theme().lightThemeData,
+                      darkTheme: Default_Theme().defaultThemeData,
+                      themeMode: switch (settingsState.themeMode) {
+                        'light' => ThemeMode.light,
+                        'system' => ThemeMode.system,
+                        _ => ThemeMode.dark,
+                      },
                       scrollBehavior: CustomScrollBehavior(),
                       debugShowCheckedModeBanner: false,
                     ),
