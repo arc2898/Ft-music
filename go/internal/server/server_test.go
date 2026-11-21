@@ -84,6 +84,7 @@ func TestAddTrackRejectsBadRequests(t *testing.T) {
 		wantStatus  int
 	}{
 		{"wrong content type", "text/plain", `{}`, http.StatusUnsupportedMediaType},
+		{"invalid JSON subtype", "application/jsonp", `{}`, http.StatusUnsupportedMediaType},
 		{"invalid JSON", "application/json", `{`, http.StatusBadRequest},
 		{"unknown field", "application/json", `{"id":"1","title":"x","artist":"y","unexpected":true}`, http.StatusBadRequest},
 		{"trailing JSON", "application/json", `{"id":"1","title":"x","artist":"y"} {}`, http.StatusBadRequest},

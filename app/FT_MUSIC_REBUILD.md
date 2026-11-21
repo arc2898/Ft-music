@@ -11,7 +11,7 @@ Current backend capabilities:
 - validated, normalized track metadata with consistent domain constraints;
 - context-aware memory and SQLite repositories;
 - SQLite initialization, WAL mode for file databases, busy timeout, and readiness checks;
-- a provider registry with isolated provider failures, parallel search aggregation, de-duplication, and stream URL validation;
+- a provider registry with isolated provider failures, parallel search aggregation, a bounded two-minute LRU cache, in-flight request coalescing, de-duplication, and stream URL validation;
 - versioned JSON routes for health, readiness, library CRUD, remote search, provider discovery, and stream resolution;
 - bounded request bodies, strict JSON decoding, pagination, request IDs, security headers, API-key protection, and graceful shutdown.
 
