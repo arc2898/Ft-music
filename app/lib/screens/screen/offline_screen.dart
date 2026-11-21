@@ -10,7 +10,6 @@ import 'package:ft_music/screens/widgets/sign_board_widget.dart';
 import 'package:ft_music/screens/widgets/snackbar.dart';
 import 'package:ft_music/screens/widgets/song_tile.dart';
 import 'package:flutter/material.dart';
-import 'package:ft_music/core/theme/app_theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ft_music/l10n/app_localizations.dart';
 import 'package:icons_plus/icons_plus.dart';

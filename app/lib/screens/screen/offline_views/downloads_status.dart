@@ -1,6 +1,5 @@
 import 'package:ft_music/screens/widgets/sign_board_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:ft_music/core/theme/app_theme.dart';
 import 'package:icons_plus/icons_plus.dart';
 
 class DownloadsView extends StatelessWidget {
