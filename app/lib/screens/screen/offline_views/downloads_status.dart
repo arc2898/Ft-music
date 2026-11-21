@@ -9,15 +9,15 @@ class DownloadsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         centerTitle: true,
         title: Text(
           'Downloads',
-          style: const TextStyle(
-                  color: Default_Theme.primaryColor1,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold)
-              .merge(Default_Theme.secondoryTextStyle),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: const Center(
