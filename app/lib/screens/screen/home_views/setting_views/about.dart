@@ -129,7 +129,7 @@ class About extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
-                            fontFamily: 'ReThink-Sans',
+                            fontFamily: 'Unageo',
                           ),
                         ),
                         ClipRRect(
@@ -151,7 +151,7 @@ class About extends StatelessWidget {
                 style: const TextStyle(
                     fontSize: 16,
                     color: kSecondaryTextColor,
-                    fontFamily: 'ReThink-Sans'),
+                    fontFamily: 'Unageo'),
               ),
               const SizedBox(height: 35),
               Container(
@@ -188,7 +188,7 @@ class About extends StatelessWidget {
                           color: kPrimaryTextColor,
                           fontWeight: FontWeight.w500,
                           fontSize: 16,
-                          fontFamily: 'ReThink-Sans',
+                          fontFamily: 'Unageo',
                           shadows: [
                             Shadow(
                               color: const Color.fromARGB(255, 255, 246, 238)
@@ -261,7 +261,7 @@ class About extends StatelessWidget {
             l10n.aboutTipQuote,
             textAlign: TextAlign.center,
             style: const TextStyle(
-                color: kSecondaryTextColor, fontSize: 14, fontFamily: 'ReThink-Sans'),
+                color: kSecondaryTextColor, fontSize: 14, fontFamily: 'Unageo'),
           ),
         ),
         const SizedBox(height: 12),
@@ -311,7 +311,7 @@ class About extends StatelessWidget {
                         color: kPrimaryTextColor,
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        fontFamily: 'ReThink-Sans',
+                        fontFamily: 'Unageo',
                       ),
                     ),
                   ],
@@ -325,7 +325,7 @@ class About extends StatelessWidget {
           l10n.aboutTipDesc,
           textAlign: TextAlign.center,
           style: const TextStyle(
-              color: kSecondaryTextColor, fontSize: 14, fontFamily: 'ReThink-Sans'),
+              color: kSecondaryTextColor, fontSize: 14, fontFamily: 'Unageo'),
         ),
       ],
     );
@@ -354,7 +354,7 @@ class About extends StatelessWidget {
                       style: const TextStyle(
                           color: kSecondaryTextColor,
                           fontSize: 12,
-                          fontFamily: 'ReThink-Sans')),
+                          fontFamily: 'Unageo')),
                 ],
               ),
             ),
@@ -369,7 +369,7 @@ class About extends StatelessWidget {
                     style: const TextStyle(
                         color: kSecondaryTextColor,
                         fontSize: 12,
-                        fontFamily: 'ReThink-Sans'));
+                        fontFamily: 'Unageo'));
               },
             ),
           ],
@@ -397,7 +397,7 @@ class _InfoPill extends StatelessWidget {
             style: const TextStyle(
                 color: kSecondaryTextColor,
                 fontSize: 13,
-                fontFamily: 'ReThink-Sans')),
+                fontFamily: 'Unageo')),
       ],
     );
 

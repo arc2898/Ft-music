@@ -335,7 +335,7 @@ class _BottomNavItem extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: color,
-                  fontFamily: 'ReThink-Sans',
+                  fontFamily: 'Unageo',
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                 ),

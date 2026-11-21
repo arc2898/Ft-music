@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 /// palettes respond to the persisted appearance setting.
 // ignore: camel_case_types
 class Default_Theme {
-  static const primaryTextStyle = TextStyle(fontFamily: 'ReThink-Sans');
-  static const secondoryTextStyle = TextStyle(fontFamily: 'ReThink-Sans');
+  static const primaryTextStyle = TextStyle(fontFamily: 'Unageo');
+  static const secondoryTextStyle = TextStyle(fontFamily: 'Unageo');
   static const secondoryTextStyleMedium =
-      TextStyle(fontFamily: 'ReThink-Sans', fontWeight: FontWeight.w700);
+      TextStyle(fontFamily: 'Unageo', fontWeight: FontWeight.w700);
   static const tertiaryTextStyle = TextStyle(fontFamily: 'CodePro');
   static const fontAwesomeRegularFont =
       TextStyle(fontFamily: 'FontAwesome-Regular');
@@ -96,7 +96,7 @@ class Default_Theme {
       scaffoldBackgroundColor: background,
       dialogBackgroundColor: elevatedSurface,
       canvasColor: background,
-      fontFamily: 'ReThink-Sans',
+      fontFamily: 'Unageo',
       colorScheme: scheme,
       primaryColor: primary,
       primaryColorDark: primary,
@@ -111,7 +111,7 @@ class Default_Theme {
         centerTitle: false,
         titleTextStyle: TextStyle(
           color: text,
-          fontFamily: 'ReThink-Sans',
+          fontFamily: 'Unageo',
           fontSize: 22,
           fontWeight: FontWeight.w800,
           letterSpacing: -0.4,
@@ -259,7 +259,7 @@ class Default_Theme {
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(cornerMedium)),
         ),
-        textStyle: TextStyle(color: text, fontFamily: 'ReThink-Sans'),
+        textStyle: TextStyle(color: text, fontFamily: 'Unageo'),
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: elevatedSurface,
@@ -267,7 +267,7 @@ class Default_Theme {
         surfaceTintColor: Colors.transparent,
         height: 72,
         labelTextStyle: const WidgetStatePropertyAll(
-          TextStyle(fontFamily: 'ReThink-Sans', fontWeight: FontWeight.w700),
+          TextStyle(fontFamily: 'Unageo', fontWeight: FontWeight.w700),
         ),
       ),
     );
