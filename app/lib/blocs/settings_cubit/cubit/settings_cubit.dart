@@ -31,134 +31,134 @@ class SettingsCubit extends Cubit<SettingsState> {
   // where the cubit is closed during startup (app killed mid-init).
   Future<void> _initSettings() async {
     final results = await Future.wait([
-      // [1] autoSlideCharts
+      // [0] autoSlideCharts
       _readSetting(
         () => _settingsRepo.getSettingBool(SettingKeys.autoSlideCharts),
         SettingKeys.autoSlideCharts,
       ),
-      // [2] downPath - may need async platform call for default
+      // [1] downPath - may need async platform call for default
       _resolveDownPath(),
-      // [3] downQuality
+      // [2] downQuality
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.downQuality,
             defaultValue: AudioStreamQualityPreference.medium.label),
         SettingKeys.downQuality,
       ),
-      // [4] strmQuality
+      // [3] strmQuality
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.strmQuality),
         SettingKeys.strmQuality,
       ),
-      // [5] historyClearTime
+      // [4] historyClearTime
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.historyClearTime),
         SettingKeys.historyClearTime,
       ),
-      // [6] lastFMScrobble
+      // [5] lastFMScrobble
       _readSetting(
         () => _settingsRepo.getSettingBool(CacheKeys.lFMScrobbleSetting),
         CacheKeys.lFMScrobbleSetting,
       ),
-      // [7] autoPlay
+      // [6] autoPlay
       _readSetting(
         () => _settingsRepo.getSettingBool(SettingKeys.autoPlay),
         SettingKeys.autoPlay,
       ),
-      // [8] autoResolveUnavailableTracks
+      // [7] autoResolveUnavailableTracks
       _readSetting(
         () => _settingsRepo
             .getSettingBool(SettingKeys.autoResolveUnavailableTracks),
         SettingKeys.autoResolveUnavailableTracks,
       ),
-      // [9] lFMPicks
+      // [8] lFMPicks
       _readSetting(
         () => _settingsRepo.getSettingBool(CacheKeys.lFMUIPicks),
         CacheKeys.lFMUIPicks,
       ),
-      // [10] backupPath
+      // [9] backupPath
       _resolveBackupPath(),
-      // [11] autoBackup
+      // [10] autoBackup
       _readSetting(
         () => _settingsRepo.getSettingBool(SettingKeys.autoBackup),
         SettingKeys.autoBackup,
       ),
-      // [12] autoGetCountry
+      // [11] autoGetCountry
       _readSetting(
         () => _settingsRepo.getSettingBool(SettingKeys.autoGetCountry),
         SettingKeys.autoGetCountry,
       ),
-      // [13] languageCode
+      // [12] languageCode
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.languageCode),
         SettingKeys.languageCode,
       ),
-      // [14] countryCode
+      // [13] countryCode
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.countryCode),
         SettingKeys.countryCode,
       ),
-      // [15] autoSaveLyrics
+      // [14] autoSaveLyrics
       _readSetting(
         () => _settingsRepo.getSettingBool(SettingKeys.autoSaveLyrics),
         SettingKeys.autoSaveLyrics,
       ),
-      // [16] chartShowMap
+      // [15] chartShowMap
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.chartShowMap),
         SettingKeys.chartShowMap,
       ),
-      // [17] crossfadeDuration
+      // [16] crossfadeDuration
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.crossfadeDuration),
         SettingKeys.crossfadeDuration,
       ),
-      // [18] eqEnabled
+      // [17] eqEnabled
       _readSetting(
         () => _settingsRepo.getSettingBool(SettingKeys.eqEnabled),
         SettingKeys.eqEnabled,
       ),
-      // [19] eqBandGains
+      // [18] eqBandGains
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.eqBandGains),
         SettingKeys.eqBandGains,
       ),
-      // [20] eqPreset
+      // [19] eqPreset
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.eqPreset,
             defaultValue: 'Flat'),
         SettingKeys.eqPreset,
       ),
-      // [21] eqSource
+      // [20] eqSource
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.eqSource,
             defaultValue: EqSourceValues.builtin),
         SettingKeys.eqSource,
       ),
-      // [22] homePluginId
+      // [21] homePluginId
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.homePluginId,
             defaultValue: ''),
         SettingKeys.homePluginId,
       ),
-      // [23] searchPluginId
+      // [22] searchPluginId
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.searchPluginId,
             defaultValue: ''),
         SettingKeys.searchPluginId,
       ),
-      // [24] resolverPriority
+      // [23] resolverPriority
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.resolverPriority,
             defaultValue: '[]'),
         SettingKeys.resolverPriority,
       ),
-      // [25] lyricsPriority
+      // [24] lyricsPriority
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.lyricsPriority,
             defaultValue: '[]'),
         SettingKeys.lyricsPriority,
       ),
-      // [26] suggestionPluginId
+      // [25] suggestionPluginId
       _readSetting(
         () => _settingsRepo.getSettingStr(SettingKeys.suggestionPluginId,
             defaultValue: ''),

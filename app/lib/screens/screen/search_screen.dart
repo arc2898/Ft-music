@@ -214,6 +214,7 @@ class _SearchScreenState extends State<SearchScreen> {
                               _highlightedSuggestionIndexNotifier,
                           onSearchRequested: _performSearch,
                           onClearRequested: () {
+                            _lastSubmittedQuery = '';
                             _textEditingController.clear();
                             _openSuggestionPanel();
                             context
@@ -222,6 +223,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             _searchFocusNode.requestFocus();
                           },
                           onQueryChanged: (val) {
+                            _lastSubmittedQuery = '';
                             _openSuggestionPanel();
                             context
                                 .read<SearchSuggestionBloc>()
