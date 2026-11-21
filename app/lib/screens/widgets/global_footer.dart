@@ -1,7 +1,6 @@
 import 'package:ft_music/blocs/player_overlay/player_overlay_cubit.dart';
 import 'package:ft_music/screens/widgets/player_overlay_wrapper.dart';
 import 'package:ft_music/screens/widgets/mini_player_widget.dart';
-import 'package:ft_music/core/theme/app_theme.dart';
 import 'package:ft_music/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

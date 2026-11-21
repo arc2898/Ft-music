@@ -3,19 +3,15 @@
 FT-music is the product name used in user-facing copy, metadata, API responses, and project documentation.
 
 - **Tagline:** Your music, openly connected
-- **Primary:** Violet `#7C3AED`
-- **Accent:** Cyan `#22D3EE`
-- **Canvas:** Midnight `#0B1020`
-- **Surfaces:** `#151B2E` and `#202943`
-- **Typography:** Unageo for interface text; CodePro for technical/metadata accents
-- **Mark direction:** Two overlapping sound-wave arcs forming an F
+- **Primary accent:** Lime `#A3E635`
+- **Supporting lime:** `#B7F36A` and `#D6FFA1`
+- **Dark canvas:** `#0B1008`
+- **Dark surfaces:** `#151D10` and `#1F2A17`
+- **Light canvas:** `#F7FAF2`
+- **Light surface:** `#FFFFFF`
+- **Typography:** ReThink Sans for interface text; CodePro for technical/metadata accents
+- **Mark direction:** A bold lime F monogram with short sound-wave bars on a deep olive-black tile
 
-`theme.json` is the canonical machine-readable token source. Client theme values should map to these tokens rather than introduce independent colors. Keep upstream license/copyright notices and compatibility identifiers where legally or technically required; they are not product branding.
+`theme.json` is the canonical machine-readable token source. Client theme values should map to these tokens rather than introduce independent colors. The editable vector mark is [icon.svg](icon.svg), and the Flutter app uses `app/assets/icons/ft_music_mark.png` for the in-app mark and launcher source.
 
-
-## Lime refresh
-
-- Primary accent: `#A3E635`; supporting lime: `#B7F36A`.
-- Dark surfaces use olive-black neutrals; the companion light palette is defined in [theme.json](theme.json).
-- Interface typography: ReThink Sans; technical typography: Code Pro.
-- The source app mark is [icon.svg](icon.svg). The Flutter launcher generator reads `app/assets/icons/ft_music_mark.png`; regenerate platform launcher assets with `dart run flutter_launcher_icons` after changing that raster source.
+To regenerate platform launcher assets after changing the raster source, run `dart run flutter_launcher_icons` from the `app/` directory. Keep upstream license/copyright notices and compatibility identifiers where legally or technically required; they are not product branding.
