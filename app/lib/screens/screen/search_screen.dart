@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:ft_music/blocs/settings_cubit/cubit/settings_cubit.dart';
 import 'package:ft_music/blocs/media_player/bloomee_player_cubit.dart';
 import 'package:ft_music/blocs/search_suggestions/search_suggestion_bloc.dart';
 import 'package:ft_music/blocs/internet_connectivity/cubit/connectivity_cubit.dart';
@@ -25,8 +24,8 @@ import 'package:ft_music/screens/widgets/playlist_card.dart';
 import 'package:ft_music/screens/widgets/sign_board_widget.dart';
 import 'package:ft_music/screens/widgets/song_tile.dart';
 import 'package:ft_music/src/rust/api/plugin/commands.dart';
-import 'package:ft_music/src/rust/api/plugin/plugin_info.dart';
 import 'package:ft_music/src/rust/api/plugin/models.dart' as plugin_models;
+import 'package:ft_music/plugins/utils/media_id.dart';
 
 class SearchScreen extends StatefulWidget {
   final String searchQuery;
@@ -46,9 +45,6 @@ class _SearchScreenState extends State<SearchScreen> {
   final ScrollController _scrollController = ScrollController();
 
   // Highly optimized State Management using Notifiers (Eliminates Root setState)
-  final ValueNotifier<ContentSearchFilter> _filterNotifier =
-      ValueNotifier(ContentSearchFilter.all);
-  final ValueNotifier<String?> _activePluginIdNotifier = ValueNotifier(null);
   final ValueNotifier<bool> _isSuggestionPanelOpenNotifier =
       ValueNotifier(false);
   final ValueNotifier<int> _highlightedSuggestionIndexNotifier =
@@ -56,6 +52,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
   List<({String query, ContentSearchFilter filter})>
       _currentCombinedSuggestions = [];
+  String _lastSubmittedQuery = '';
+  ContentSearchFilter _lastSearchFilter = ContentSearchFilter.all;
 
   @override
   void initState() {
@@ -72,26 +70,6 @@ class _SearchScreenState extends State<SearchScreen> {
       }
     });
 
-    final pluginState = context.read<PluginBloc>().state;
-    final resolvers = pluginState.loadedContentResolvers;
-    if (resolvers.isNotEmpty) {
-      final persistedId = context.read<SettingsCubit>().state.searchPluginId;
-      final hasPersistedPlugin = persistedId.isNotEmpty &&
-          resolvers.any((p) => p.manifest.id == persistedId);
-      final spotifyResolver = resolvers.where((plugin) {
-        final label = '${plugin.name} ${plugin.manifest.id}'.toLowerCase();
-        return label.contains('spotify');
-      });
-      final activeId = hasPersistedPlugin
-          ? persistedId
-          : (spotifyResolver.isNotEmpty
-              ? spotifyResolver.first.manifest.id
-              : resolvers.first.manifest.id);
-
-      _activePluginIdNotifier.value = activeId;
-      _contentBloc.add(SetActiveContentPlugin(pluginId: activeId));
-    }
-
     if (widget.searchQuery.isNotEmpty) {
       _textEditingController.text = widget.searchQuery;
       _doSearch(widget.searchQuery);
@@ -103,8 +81,6 @@ class _SearchScreenState extends State<SearchScreen> {
     _scrollController.dispose();
     _textEditingController.dispose();
     _searchFocusNode.dispose();
-    _filterNotifier.dispose();
-    _activePluginIdNotifier.dispose();
     _isSuggestionPanelOpenNotifier.dispose();
     _highlightedSuggestionIndexNotifier.dispose();
     _contentBloc.close();
@@ -152,30 +128,24 @@ class _SearchScreenState extends State<SearchScreen> {
   void _performSearch(
       {required String query, required ContentSearchFilter filter}) {
     final normalizedQuery = _normalizeSearchQuery(query);
-    if (normalizedQuery.isEmpty || _activePluginIdNotifier.value == null)
-      return;
+    if (normalizedQuery.isEmpty) return;
+    _lastSubmittedQuery = normalizedQuery;
+    _lastSearchFilter = filter;
 
     context
         .read<SearchSuggestionBloc>()
         .add(SearchSuggestionSave(normalizedQuery));
     _setSearchFieldText(normalizedQuery);
-    _filterNotifier.value = filter;
     _closeSuggestionPanel();
     _contentBloc.add(SearchContent(query: normalizedQuery, filter: filter));
   }
 
   void _doSearch(String query) =>
-      _performSearch(query: query, filter: _filterNotifier.value);
+      _performSearch(query: query, filter: ContentSearchFilter.all);
   void _doSearchInAllCategories(String query) =>
       _performSearch(query: query, filter: ContentSearchFilter.all);
   void _doSearchWithFilter(String query, ContentSearchFilter filter) =>
       _performSearch(query: query, filter: filter);
-
-  void _triggerSearch() {
-    if (_textEditingController.text.trim().isNotEmpty) {
-      _doSearch(_textEditingController.text);
-    }
-  }
 
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
     if (!_isSuggestionPanelOpenNotifier.value ||
@@ -202,20 +172,15 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<PluginBloc, PluginState>(
-      listenWhen: (prev, curr) =>
-          prev.loadedContentResolvers.isEmpty &&
-          curr.loadedContentResolvers.isNotEmpty &&
-          _activePluginIdNotifier.value == null,
+      listenWhen: (previous, current) =>
+          previous.loadedPluginIds != current.loadedPluginIds,
       listener: (context, pluginState) {
-        final resolvers = pluginState.loadedContentResolvers;
-        final persistedId = context.read<SettingsCubit>().state.searchPluginId;
-        final hasPersistedPlugin = persistedId.isNotEmpty &&
-            resolvers.any((p) => p.manifest.id == persistedId);
-        final activeId =
-            hasPersistedPlugin ? persistedId : resolvers.first.manifest.id;
-
-        _activePluginIdNotifier.value = activeId;
-        _contentBloc.add(SetActiveContentPlugin(pluginId: activeId));
+        final query = _lastSubmittedQuery;
+        if (query.isNotEmpty && pluginState.loadedContentResolvers.isNotEmpty) {
+          _contentBloc.add(
+            SearchContent(query: query, filter: _lastSearchFilter),
+          );
+        }
       },
       child: GestureDetector(
         onTap: () {
@@ -263,18 +228,6 @@ class _SearchScreenState extends State<SearchScreen> {
                                 .add(SearchSuggestionFetch(val));
                           },
                         ),
-                        _AestheticFilterChipsSliver(
-                          filterNotifier: _filterNotifier,
-                          textEditingController: _textEditingController,
-                          onFilterTapped: _triggerSearch,
-                        ),
-                        if (!isSuggestionPanelOpen)
-                          _PluginsGlassyBoxSliver(
-                            activePluginNotifier: _activePluginIdNotifier,
-                            contentBloc: _contentBloc,
-                            onPluginChanged: _triggerSearch,
-                            textEditingController: _textEditingController,
-                          ),
                         if (isSuggestionPanelOpen)
                           _SuggestionsSliver(
                             textEditingController: _textEditingController,
@@ -296,10 +249,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             },
                           )
                         else
-                          _ContentSliver(
-                            contentBloc: _contentBloc,
-                            activePluginNotifier: _activePluginIdNotifier,
-                          ),
+                          _ContentSliver(contentBloc: _contentBloc),
                       ],
                     );
                   },
@@ -465,275 +415,6 @@ class _FloatingSearchBarSliver extends StatelessWidget {
                   key: const ValueKey('search-idle'),
                   color: Default_Theme.primaryColor1.withValues(alpha: 0.5),
                   size: 20),
-        );
-      },
-    );
-  }
-}
-
-class _AestheticFilterChipsSliver extends StatelessWidget {
-  final ValueNotifier<ContentSearchFilter> filterNotifier;
-  final TextEditingController textEditingController;
-  final VoidCallback onFilterTapped;
-
-  const _AestheticFilterChipsSliver(
-      {required this.filterNotifier,
-      required this.textEditingController,
-      required this.onFilterTapped});
-
-  @override
-  Widget build(BuildContext context) {
-    return SliverToBoxAdapter(
-      child: ValueListenableBuilder<ContentSearchFilter>(
-        valueListenable: filterNotifier,
-        builder: (context, filterValue, child) {
-          return SizedBox(
-            height: 38,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-              physics: const BouncingScrollPhysics(),
-              itemCount: ContentSearchFilter.values.length,
-              separatorBuilder: (context, index) => const SizedBox(width: 8),
-              itemBuilder: (context, index) {
-                final e = ContentSearchFilter.values[index];
-                final isSelected = filterValue == e;
-                final displayName =
-                    e.name[0].toUpperCase() + e.name.substring(1);
-
-                return InkWell(
-                  borderRadius: BorderRadius.circular(20),
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onTap: () {
-                    filterNotifier.value = e;
-                    if (textEditingController.text.isNotEmpty) onFilterTapped();
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeOut,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? Default_Theme.accentColor2
-                          : Default_Theme.primaryColor2.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                          color: isSelected
-                              ? Default_Theme.accentColor2
-                              : Colors.white.withValues(alpha: 0.05)),
-                    ),
-                    child: Text(
-                      displayName,
-                      style: Default_Theme.secondoryTextStyleMedium.copyWith(
-                        color: isSelected
-                            ? Default_Theme.primaryColor2
-                            : Default_Theme.primaryColor1
-                                .withValues(alpha: 0.8),
-                        fontSize: 13,
-                        fontWeight:
-                            isSelected ? FontWeight.w700 : FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _PluginsGlassyBoxSliver extends StatelessWidget {
-  final ValueNotifier<String?> activePluginNotifier;
-  final ContentBloc contentBloc;
-  final TextEditingController textEditingController;
-  final VoidCallback onPluginChanged;
-
-  const _PluginsGlassyBoxSliver({
-    required this.activePluginNotifier,
-    required this.contentBloc,
-    required this.textEditingController,
-    required this.onPluginChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SliverToBoxAdapter(
-      child: BlocBuilder<PluginBloc, PluginState>(
-        buildWhen: (prev, curr) =>
-            prev.loadedContentResolvers != curr.loadedContentResolvers,
-        builder: (context, pluginState) {
-          final resolvers = pluginState.loadedContentResolvers;
-
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: Default_Theme.primaryColor2.withValues(alpha: 0.04),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.05), width: 1),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.extension_rounded,
-                                size: 18, color: Default_Theme.accentColor2),
-                            const SizedBox(width: 8),
-                            Text(
-                              AppLocalizations.of(context)!.searchSources,
-                              style: Default_Theme.secondoryTextStyleMedium
-                                  .copyWith(
-                                fontSize: 12,
-                                letterSpacing: 1.5,
-                                fontWeight: FontWeight.w800,
-                                color: Default_Theme.primaryColor1
-                                    .withValues(alpha: 0.7),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      if (resolvers.isEmpty)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                          child: Text(
-                            AppLocalizations.of(context)!.searchNoPlugins,
-                            style: TextStyle(
-                                color: Default_Theme.primaryColor1
-                                    .withValues(alpha: 0.4),
-                                fontStyle: FontStyle.italic),
-                          ),
-                        )
-                      else
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          physics: const BouncingScrollPhysics(),
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Row(
-                            children: resolvers
-                                .map((plugin) => Padding(
-                                      padding: const EdgeInsets.only(right: 10),
-                                      child: _PluginChip(
-                                        plugin: plugin,
-                                        activePluginNotifier:
-                                            activePluginNotifier,
-                                        onTap: () {
-                                          final id = plugin.manifest.id;
-                                          if (activePluginNotifier.value == id)
-                                            return;
-                                          activePluginNotifier.value = id;
-                                          contentBloc.add(
-                                              SetActiveContentPlugin(
-                                                  pluginId: id));
-                                          context
-                                              .read<SettingsCubit>()
-                                              .setSearchPluginId(id);
-                                          if (textEditingController.text
-                                              .isNotEmpty) onPluginChanged();
-                                        },
-                                      ),
-                                    ))
-                                .toList(),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _PluginChip extends StatelessWidget {
-  final PluginInfo plugin;
-  final ValueNotifier<String?> activePluginNotifier;
-  final VoidCallback onTap;
-
-  const _PluginChip(
-      {required this.plugin,
-      required this.activePluginNotifier,
-      required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<String?>(
-      valueListenable: activePluginNotifier,
-      builder: (context, activeId, child) {
-        final isSelected = activeId == plugin.manifest.id;
-
-        return InkWell(
-          borderRadius: BorderRadius.circular(50),
-          splashColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-          onTap: onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            curve: Curves.easeOut,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5.5),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? Default_Theme.accentColor2.withValues(alpha: 0.15)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(50),
-              border: Border.all(
-                color: isSelected
-                    ? Default_Theme.accentColor2
-                    : Default_Theme.primaryColor1.withValues(alpha: 0.15),
-                width: 1.5,
-              ),
-            ),
-            child: AnimatedSize(
-              duration: const Duration(milliseconds: 150),
-              curve: Curves.easeOutCubic,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (isSelected) ...[
-                    const Icon(Icons.check_rounded,
-                        size: 13, color: Default_Theme.accentColor2),
-                    const SizedBox(width: 4),
-                  ],
-                  Text(
-                    plugin.name,
-                    style: Default_Theme.secondoryTextStyleMedium.merge(
-                      TextStyle(
-                        color: isSelected
-                            ? Default_Theme.accentColor2
-                            : Default_Theme.primaryColor1
-                                .withValues(alpha: 0.8),
-                        fontSize: 12.5,
-                        fontWeight:
-                            isSelected ? FontWeight.w700 : FontWeight.w500,
-                        letterSpacing: 0.3,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
         );
       },
     );
@@ -1160,10 +841,8 @@ class _EntitySuggestionTile extends StatelessWidget {
 
 class _ContentSliver extends StatelessWidget {
   final ContentBloc contentBloc;
-  final ValueNotifier<String?> activePluginNotifier;
 
-  const _ContentSliver(
-      {required this.contentBloc, required this.activePluginNotifier});
+  const _ContentSliver({required this.contentBloc});
 
   @override
   Widget build(BuildContext context) {
@@ -1194,8 +873,7 @@ class _ContentSliver extends StatelessWidget {
                     state.searchStatus == SearchStatus.loaded ||
                     state.searchStatus == SearchStatus.loadingMore) &&
                 hasResults) {
-              return _SliverSearchResults(
-                  state: state, activePluginNotifier: activePluginNotifier);
+              return _SliverSearchResults(state: state);
             }
             if (state.searchStatus == SearchStatus.loaded &&
                 state.searchResults != null &&
@@ -1228,10 +906,8 @@ class _ContentSliver extends StatelessWidget {
 
 class _SliverSearchResults extends StatelessWidget {
   final ContentState state;
-  final ValueNotifier<String?> activePluginNotifier;
 
-  const _SliverSearchResults(
-      {required this.state, required this.activePluginNotifier});
+  const _SliverSearchResults({required this.state});
 
   @override
   Widget build(BuildContext context) {
@@ -1254,7 +930,6 @@ class _SliverSearchResults extends StatelessWidget {
       }
     }
 
-    final pluginId = activePluginNotifier.value ?? '';
     final isLoadingMore = state.searchStatus == SearchStatus.loadingMore;
     final isRefreshing = state.searchStatus == SearchStatus.loading;
 
@@ -1321,19 +996,19 @@ class _SliverSearchResults extends StatelessWidget {
         if (albums.isNotEmpty) ...[
           _sliverSectionHeader(AppLocalizations.of(context)!.searchAlbums),
           _buildResponsiveGrid(albums
-              .map((a) => AlbumCard(album: a, pluginId: pluginId))
+              .map((a) => AlbumCard(album: a, pluginId: pluginIdOf(a.id) ?? ''))
               .toList()),
         ],
         if (artists.isNotEmpty) ...[
           _sliverSectionHeader(AppLocalizations.of(context)!.searchArtists),
           _buildResponsiveGrid(artists
-              .map((a) => ArtistCard(artist: a, pluginId: pluginId))
+              .map((a) => ArtistCard(artist: a, pluginId: pluginIdOf(a.id) ?? ''))
               .toList()),
         ],
         if (playlists.isNotEmpty) ...[
           _sliverSectionHeader(AppLocalizations.of(context)!.searchPlaylists),
           _buildResponsiveGrid(playlists
-              .map((p) => PlaylistCard(playlist: p, pluginId: pluginId))
+              .map((p) => PlaylistCard(playlist: p, pluginId: pluginIdOf(p.id) ?? ''))
               .toList()),
         ],
         if (isLoadingMore)

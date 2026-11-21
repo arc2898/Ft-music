@@ -468,7 +468,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           create: (context) => SearchSuggestionBloc(
             searchHistoryDao: SearchHistoryDAO(DBProvider.db),
             pluginService: ServiceLocator.pluginService,
-            settingsDao: SettingsDAO(DBProvider.db),
           ),
         ),
         BlocProvider(

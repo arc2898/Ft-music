@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,6 +16,7 @@ import 'package:ft_music/services/plugin/plugin_service.dart';
 import 'package:ft_music/plugins/utils/media_id.dart';
 import 'package:ft_music/services/plugin_cache_codec.dart';
 import 'package:ft_music/src/rust/api/plugin/commands.dart';
+import 'package:ft_music/src/rust/api/plugin/types.dart';
 
 /// Handles content resolution: search, album/artist/playlist details,
 /// stream URLs, home sections.
@@ -60,22 +62,116 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
         .switchMap(mapper);
   }
 
+  static const String _searchTokenPrefix = 'ftm1:';
+
+  Future<List<String>> _loadedContentResolverIds() async {
+    final loaded = _pluginService.getLoadedPlugins().toSet();
+    final available = await _pluginService.getAvailablePlugins();
+    return available
+        .where((plugin) =>
+            plugin.pluginType == PluginType.contentResolver &&
+            loaded.contains(plugin.manifest.id))
+        .map((plugin) => plugin.manifest.id)
+        .toList(growable: false);
+  }
+
+  Future<({String pluginId, PagedMediaItems? page})> _searchProvider({
+    required String pluginId,
+    required String query,
+    required ContentSearchFilter filter,
+    String? pageToken,
+  }) async {
+    try {
+      final response = await _pluginService
+          .execute(
+            pluginId: pluginId,
+            request: PluginRequest.contentResolver(
+              ContentResolverCommand.search(
+                query: query,
+                filter: filter,
+                pageToken: pageToken,
+              ),
+            ),
+          )
+          .timeout(const Duration(seconds: 8));
+
+      return (
+        pluginId: pluginId,
+        page: response is PluginResponse_Search ? response.field0 : null,
+      );
+    } catch (error, stackTrace) {
+      log(
+        'Search provider $pluginId failed',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'ContentBloc',
+      );
+      return (pluginId: pluginId, page: null);
+    }
+  }
+
+  String? _encodeSearchPageTokens(Map<String, String> tokens) {
+    if (tokens.isEmpty) return null;
+    final encoded = base64Url.encode(utf8.encode(jsonEncode(tokens)));
+    return '$_searchTokenPrefix$encoded';
+  }
+
+  Map<String, String> _decodeSearchPageTokens(String token) {
+    if (!token.startsWith(_searchTokenPrefix)) {
+      final fallbackPlugin = state.activePluginId;
+      return fallbackPlugin == null ? {} : {fallbackPlugin: token};
+    }
+
+    try {
+      final encoded = token.substring(_searchTokenPrefix.length);
+      final decoded = jsonDecode(
+        utf8.decode(base64Url.decode(base64Url.normalize(encoded))),
+      );
+      if (decoded is! Map) return {};
+      return decoded.map(
+        (key, value) => MapEntry(key.toString(), value.toString()),
+      );
+    } catch (error) {
+      log('Invalid aggregated search page token: $error', name: 'ContentBloc');
+      return {};
+    }
+  }
+
+  String _normalizeSearchText(String value) =>
+      value.trim().toLowerCase().replaceAll(RegExp(r'\\s+'), ' ');
+
+  String _searchItemKey(MediaItem item) => switch (item) {
+        MediaItem_Track(:final field0) =>
+          'track:${_normalizeSearchText(field0.title)}:${_normalizeSearchText(field0.artists.map((artist) => artist.name).join('|'))}',
+        MediaItem_Album(:final field0) =>
+          'album:${_normalizeSearchText(field0.title)}:${_normalizeSearchText(field0.artists.map((artist) => artist.name).join('|'))}',
+        MediaItem_Artist(:final field0) =>
+          'artist:${_normalizeSearchText(field0.name)}',
+        MediaItem_Playlist(:final field0) =>
+          'playlist:${_normalizeSearchText(field0.title)}:${_normalizeSearchText(field0.owner ?? '')}',
+      };
+
+  List<MediaItem> _mergeSearchItems(Iterable<List<MediaItem>> groups) {
+    final seen = <String>{};
+    final merged = <MediaItem>[];
+    for (final group in groups) {
+      for (final item in group) {
+        if (seen.add(_searchItemKey(item))) {
+          merged.add(item);
+        }
+      }
+    }
+    return merged;
+  }
+
   // ── Search ─────────────────────────────────────────────────────────────────
 
   Future<void> _onSearch(
     SearchContent event,
     Emitter<ContentState> emit,
   ) async {
-    final pluginId = state.activePluginId;
-    if (pluginId == null) {
-      emit(state.copyWith(
-        searchStatus: SearchStatus.error,
-        error: 'No active content plugin selected',
-      ));
-      return;
-    }
-
-    if (event.query.trim().isEmpty) {
+    final query = event.query.trim();
+    if (query.isEmpty) {
       emit(state.copyWith(
         searchStatus: SearchStatus.initial,
         searchQuery: '',
@@ -88,60 +184,73 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
 
     emit(state.copyWith(
       searchStatus: SearchStatus.loading,
-      searchQuery: event.query,
+      searchQuery: query,
       searchFilter: event.filter,
+      clearSearchResults: true,
       clearError: true,
     ));
 
     try {
-      final response = await _pluginService.execute(
-        pluginId: pluginId,
-        request: PluginRequest.contentResolver(
-          ContentResolverCommand.search(
-            query: event.query,
-            filter: event.filter,
-            pageToken: event.pageToken,
-          ),
-        ),
-      );
+      final providers = await _loadedContentResolverIds();
+      if (emit.isDone) return;
+      if (providers.isEmpty) {
+        emit(state.copyWith(
+          searchStatus: SearchStatus.error,
+          searchQuery: query,
+          error: 'No enabled search sources are available.',
+          clearSearchResults: true,
+        ));
+        return;
+      }
 
-      response.when(
-        search: (results) {
-          emit(state.copyWith(
-            searchStatus: SearchStatus.loaded,
-            searchFilter: event.filter,
-            searchResults: results,
-          ));
-        },
-        // Handle unexpected response types gracefully.
-        trackDetails: (_) => _unexpectedResponse(emit, 'search'),
-        albumDetails: (_) => _unexpectedResponse(emit, 'search'),
-        artistDetails: (_) => _unexpectedResponse(emit, 'search'),
-        playlistDetails: (_) => _unexpectedResponse(emit, 'search'),
-        streams: (_) => _unexpectedResponse(emit, 'search'),
-        moreTracks: (_) => _unexpectedResponse(emit, 'search'),
-        moreAlbums: (_) => _unexpectedResponse(emit, 'search'),
-        homeSections: (_) => _unexpectedResponse(emit, 'search'),
-        loadMoreItems: (_) => _unexpectedResponse(emit, 'search'),
-        charts: (_) => _unexpectedResponse(emit, 'search'),
-        chartDetails: (_) => _unexpectedResponse(emit, 'search'),
-        segments: (_) => _unexpectedResponse(emit, 'search'),
-        lyricsResult: (_) => _unexpectedResponse(emit, 'search'),
-        lyricsSearchResults: (_) => _unexpectedResponse(emit, 'search'),
-        lyricsById: (_, __) => _unexpectedResponse(emit, 'search'),
-        suggestions: (_) => _unexpectedResponse(emit, 'search'),
-        canHandle: (_) => _unexpectedResponse(emit, 'search'),
-        collectionInfo: (_) => _unexpectedResponse(emit, 'search'),
-        importTracks: (_) => _unexpectedResponse(emit, 'search'),
-        ack: () => _unexpectedResponse(emit, 'search'),
+      final results = await Future.wait(
+        providers.map((pluginId) => _searchProvider(
+              pluginId: pluginId,
+              query: query,
+              filter: event.filter,
+            )),
       );
-    } on PluginException catch (e) {
-      _handlePluginError(emit, e, SearchStatus.error);
-    } catch (e, stack) {
-      log('Search error', error: e, stackTrace: stack, name: 'ContentBloc');
+      if (emit.isDone) return;
+
+      final successful = results
+          .where((result) => result.page != null)
+          .toList(growable: false);
+      if (successful.isEmpty) {
+        emit(state.copyWith(
+          searchStatus: SearchStatus.error,
+          searchQuery: query,
+          error: 'All search sources failed to respond.',
+          clearSearchResults: true,
+        ));
+        return;
+      }
+
+      final nextTokens = <String, String>{
+        for (final result in successful)
+          if (result.page!.nextPageToken != null)
+            result.pluginId: result.page!.nextPageToken!,
+      };
+      emit(state.copyWith(
+        searchStatus: SearchStatus.loaded,
+        searchQuery: query,
+        searchFilter: event.filter,
+        searchResults: PagedMediaItems(
+          items: _mergeSearchItems(
+            successful.map((result) => result.page!.items),
+          ),
+          nextPageToken: _encodeSearchPageTokens(nextTokens),
+        ),
+        clearError: true,
+      ));
+    } catch (error, stackTrace) {
+      if (emit.isDone) return;
+      log('Aggregated search failed',
+          error: error, stackTrace: stackTrace, name: 'ContentBloc');
       emit(state.copyWith(
         searchStatus: SearchStatus.error,
-        error: 'Search failed: $e',
+        searchQuery: query,
+        error: 'Search failed: $error',
+        clearSearchResults: true,
       ));
     }
   }
@@ -150,77 +259,77 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
     LoadMoreSearchContent event,
     Emitter<ContentState> emit,
   ) async {
-    final pluginId = state.activePluginId;
     final currentResults = state.searchResults;
     final query = state.searchQuery.trim();
-
-    if (pluginId == null ||
-        query.isEmpty ||
+    if (query.isEmpty ||
         currentResults == null ||
         state.searchStatus == SearchStatus.loadingMore) {
       return;
     }
 
-    emit(state.copyWith(
-      searchStatus: SearchStatus.loadingMore,
-      clearError: true,
-    ));
+    final pageTokens = _decodeSearchPageTokens(event.pageToken);
+    final loadedIds = _pluginService.getLoadedPlugins().toSet();
+    pageTokens.removeWhere((pluginId, _) => !loadedIds.contains(pluginId));
+    if (pageTokens.isEmpty) {
+      emit(state.copyWith(
+        searchStatus: SearchStatus.loaded,
+        searchResults: PagedMediaItems(items: currentResults.items),
+      ));
+      return;
+    }
 
+    emit(state.copyWith(searchStatus: SearchStatus.loadingMore, clearError: true));
     try {
-      final response = await _pluginService.execute(
-        pluginId: pluginId,
-        request: PluginRequest.contentResolver(
-          ContentResolverCommand.search(
-            query: query,
-            filter: state.searchFilter,
-            pageToken: event.pageToken,
-          ),
-        ),
+      final entries = pageTokens.entries.toList(growable: false);
+      final results = await Future.wait(
+        entries.map((entry) => _searchProvider(
+              pluginId: entry.key,
+              query: query,
+              filter: state.searchFilter,
+              pageToken: entry.value,
+            )),
       );
+      if (emit.isDone) return;
 
-      response.when(
-        search: (results) {
-          emit(state.copyWith(
-            searchStatus: SearchStatus.loaded,
-            searchResults: PagedMediaItems(
-              items: [...currentResults.items, ...results.items],
-              nextPageToken: results.nextPageToken,
-            ),
-          ));
-        },
-        trackDetails: (_) => _unexpectedResponse(emit, 'searchLoadMore'),
-        albumDetails: (_) => _unexpectedResponse(emit, 'searchLoadMore'),
-        artistDetails: (_) => _unexpectedResponse(emit, 'searchLoadMore'),
-        playlistDetails: (_) => _unexpectedResponse(emit, 'searchLoadMore'),
-        streams: (_) => _unexpectedResponse(emit, 'searchLoadMore'),
-        moreTracks: (_) => _unexpectedResponse(emit, 'searchLoadMore'),
-        moreAlbums: (_) => _unexpectedResponse(emit, 'searchLoadMore'),
-        homeSections: (_) => _unexpectedResponse(emit, 'searchLoadMore'),
-        loadMoreItems: (_) => _unexpectedResponse(emit, 'searchLoadMore'),
-        charts: (_) => _unexpectedResponse(emit, 'searchLoadMore'),
-        chartDetails: (_) => _unexpectedResponse(emit, 'searchLoadMore'),
-        segments: (_) => _unexpectedResponse(emit, 'searchLoadMore'),
-        lyricsResult: (_) => _unexpectedResponse(emit, 'searchLoadMore'),
-        lyricsSearchResults: (_) => _unexpectedResponse(emit, 'searchLoadMore'),
-        lyricsById: (_, __) => _unexpectedResponse(emit, 'searchLoadMore'),
-        suggestions: (_) => _unexpectedResponse(emit, 'searchLoadMore'),
-        canHandle: (_) => _unexpectedResponse(emit, 'searchLoadMore'),
-        collectionInfo: (_) => _unexpectedResponse(emit, 'searchLoadMore'),
-        importTracks: (_) => _unexpectedResponse(emit, 'searchLoadMore'),
-        ack: () => _unexpectedResponse(emit, 'searchLoadMore'),
-      );
-    } on PluginException catch (e) {
-      _handlePluginError(emit, e, SearchStatus.loaded);
-    } catch (e, stack) {
+      final byPlugin = {
+        for (final result in results) result.pluginId: result,
+      };
+      final nextTokens = <String, String>{};
+      final newGroups = <List<MediaItem>>[currentResults.items];
+
+      for (final entry in entries) {
+        final result = byPlugin[entry.key];
+        if (result?.page == null) {
+          nextTokens[entry.key] = entry.value;
+          continue;
+        }
+        newGroups.add(result!.page!.items);
+        final nextPageToken = result.page!.nextPageToken;
+        if (nextPageToken != null) {
+          nextTokens[entry.key] = nextPageToken;
+        }
+      }
+
+      emit(state.copyWith(
+        searchStatus: SearchStatus.loaded,
+        searchResults: PagedMediaItems(
+          items: _mergeSearchItems(newGroups),
+          nextPageToken: _encodeSearchPageTokens(nextTokens),
+        ),
+        clearError: true,
+      ));
+    } catch (error, stackTrace) {
+      if (emit.isDone) return;
       log(
-        'Search pagination error',
-        error: e,
-        stackTrace: stack,
+        'Aggregated search pagination failed',
+        error: error,
+        stackTrace: stackTrace,
         name: 'ContentBloc',
       );
       emit(state.copyWith(
         searchStatus: SearchStatus.loaded,
-        error: 'Failed to load more search results: $e',
+        searchResults: PagedMediaItems(items: currentResults.items),
+        error: 'Could not load more results: $error',
       ));
     }
   }

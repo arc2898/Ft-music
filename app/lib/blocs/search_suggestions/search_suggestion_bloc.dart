@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:ft_music/services/db/dao/search_history_dao.dart';
-import 'package:ft_music/services/db/dao/settings_dao.dart';
 import 'package:ft_music/services/plugin/plugin_service.dart';
-import 'package:ft_music/core/constants/setting_keys.dart';
 import 'package:ft_music/src/rust/api/plugin/commands.dart';
+import 'package:ft_music/src/rust/api/plugin/types.dart';
 import 'package:ft_music/src/rust/api/plugin/models.dart' as plugin_models;
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -20,17 +19,14 @@ class SearchSuggestionBloc
     extends Bloc<SearchSuggestionEvent, SearchSuggestionState> {
   final SearchHistoryDAO _searchHistoryDao;
   final PluginService _pluginService;
-  final SettingsDAO _settingsDao;
   bool _isDisposed = false;
   int _fetchVersion = 0;
 
   SearchSuggestionBloc({
     required SearchHistoryDAO searchHistoryDao,
     required PluginService pluginService,
-    required SettingsDAO settingsDao,
   })  : _searchHistoryDao = searchHistoryDao,
         _pluginService = pluginService,
-        _settingsDao = settingsDao,
         super(const SearchSuggestionLoading()) {
     on<SearchSuggestionFetch>(
       (event, emit) async {
@@ -94,56 +90,102 @@ class SearchSuggestionBloc
     });
   }
 
-  /// Returns a tuple of (query strings, entity suggestions) from the plugin.
+  /// Collect suggestions from every loaded suggestion-provider plugin.
   Future<(List<String>, List<plugin_models.EntitySuggestion>)>
       _getPluginSuggestions(String query) async {
-    final pluginId =
-        await _settingsDao.getSettingStr(SettingKeys.suggestionPluginId);
-    if (pluginId == null || pluginId.isEmpty) {
+    try {
+      final loaded = _pluginService.getLoadedPlugins().toSet();
+      final available = await _pluginService.getAvailablePlugins();
+      final providerIds = available
+          .where((plugin) =>
+              plugin.pluginType == PluginType.searchSuggestionProvider &&
+              loaded.contains(plugin.manifest.id))
+          .map((plugin) => plugin.manifest.id)
+          .toList(growable: false);
+
+      if (providerIds.isEmpty) {
+        return (<String>[], <plugin_models.EntitySuggestion>[]);
+      }
+
+      final responses = await Future.wait(
+        providerIds.map((pluginId) => _getSuggestionsFromProvider(
+              pluginId: pluginId,
+              query: query,
+            )),
+      );
+
+      final queries = <String>[];
+      final entities = <plugin_models.EntitySuggestion>[];
+      final seenEntities = <String>{};
+      for (final response in responses) {
+        queries.addAll(response.$1);
+        for (final entity in response.$2) {
+          final key = '${entity.kind.name}:${entity.id}';
+          if (seenEntities.add(key)) entities.add(entity);
+        }
+      }
+      return (queries, entities);
+    } catch (error, stackTrace) {
+      log(
+        'Loading search suggestion providers failed',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'SearchSuggestionBloc',
+      );
       return (<String>[], <plugin_models.EntitySuggestion>[]);
     }
+  }
 
+  Future<(List<String>, List<plugin_models.EntitySuggestion>)>
+      _getSuggestionsFromProvider({
+    required String pluginId,
+    required String query,
+  }) async {
     try {
-      final PluginRequest request;
-      if (query.isEmpty || query.trim().isEmpty) {
-        request = PluginRequest.searchSuggestionProvider(
-          SearchSuggestionCommand.getDefaultSuggestions(
-            limit: 10,
-            includeEntities: true,
-          ),
-        );
-      } else {
-        request = PluginRequest.searchSuggestionProvider(
-          SearchSuggestionCommand.getSuggestions(
-            query: query,
-            limit: 10,
-            includeEntities: true,
-          ),
-        );
+      final PluginRequest request = query.trim().isEmpty
+          ? PluginRequest.searchSuggestionProvider(
+              SearchSuggestionCommand.getDefaultSuggestions(
+                limit: 10,
+                includeEntities: true,
+              ),
+            )
+          : PluginRequest.searchSuggestionProvider(
+              SearchSuggestionCommand.getSuggestions(
+                query: query,
+                limit: 10,
+                includeEntities: true,
+              ),
+            );
+
+      final response = await _pluginService
+          .execute(pluginId: pluginId, request: request)
+          .timeout(const Duration(seconds: 5));
+
+      if (response is! PluginResponse_Suggestions) {
+        return (<String>[], <plugin_models.EntitySuggestion>[]);
       }
 
-      final response = await _pluginService.execute(
-        pluginId: pluginId,
-        request: request,
-      ).timeout(const Duration(seconds: 5));
-
-      if (response is PluginResponse_Suggestions) {
-        final queries = <String>[];
-        final entities = <plugin_models.EntitySuggestion>[];
-        for (final s in response.field0) {
-          switch (s) {
-            case plugin_models.Suggestion_Query(:final field0):
-              queries.add(field0);
-            case plugin_models.Suggestion_Entity(:final field0):
-              entities.add(field0);
-          }
+      final queries = <String>[];
+      final entities = <plugin_models.EntitySuggestion>[];
+      for (final suggestion in response.field0) {
+        switch (suggestion) {
+          case plugin_models.Suggestion_Query(:final field0):
+            queries.add(field0);
+          case plugin_models.Suggestion_Entity(:final field0):
+            entities.add(field0);
         }
-        return (queries, entities);
       }
+      return (queries, entities);
     } on TimeoutException {
-      log("Plugin suggestion timed out", name: "SearchSuggestionBloc");
-    } catch (e) {
-      log("Plugin suggestion error: $e", name: "SearchSuggestionBloc");
+      log('Search suggestion provider $pluginId timed out',
+          name: 'SearchSuggestionBloc');
+    } catch (error, stackTrace) {
+      log(
+        'Search suggestion provider $pluginId failed',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'SearchSuggestionBloc',
+      );
     }
     return (<String>[], <plugin_models.EntitySuggestion>[]);
   }
