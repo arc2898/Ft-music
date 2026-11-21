@@ -1,0 +1,9 @@
+# Local SQLite data
+ft-music.db
+ft-music.db-shm
+ft-music.db-wal
+
+# Go build outputs
+/ft-music
+*.test
+coverage.out

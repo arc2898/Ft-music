@@ -5,12 +5,14 @@
 package memory
 
 import (
-	"github.com/ft-music/ft-music/internal/domain"
-	"github.com/ft-music/ft-music/internal/repository"
+	"context"
 	"sort"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/arc2898/ft-music/go/internal/domain"
+	"github.com/arc2898/ft-music/go/internal/repository"
 )
 
 type Tracks struct {
@@ -19,28 +21,49 @@ type Tracks struct {
 }
 
 func NewTracks() *Tracks { return &Tracks{tracks: make(map[string]domain.Track)} }
-func (r *Tracks) Add(t domain.Track) (domain.Track, error) {
-	if t.CreatedAt.IsZero() {
-		t.CreatedAt = time.Now().UTC()
+
+func (r *Tracks) Add(ctx context.Context, t domain.Track) (domain.Track, error) {
+	if err := ctx.Err(); err != nil {
+		return domain.Track{}, err
+	}
+	t = t.Normalize()
+	if err := t.Validate(); err != nil {
+		return domain.Track{}, err
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	if existing, ok := r.tracks[t.ID]; ok {
+		t.CreatedAt = existing.CreatedAt
+	}
+	if t.CreatedAt.IsZero() {
+		t.CreatedAt = time.Now().UTC()
+	} else {
+		t.CreatedAt = t.CreatedAt.UTC()
+	}
 	r.tracks[t.ID] = t
 	return t, nil
 }
-func (r *Tracks) List() ([]domain.Track, error) {
+
+func (r *Tracks) List(ctx context.Context) ([]domain.Track, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	out := make([]domain.Track, 0, len(r.tracks))
 	for _, t := range r.tracks {
 		out = append(out, t)
 	}
-	sort.Slice(out, func(i, j int) bool { return out[i].CreatedAt.Before(out[j].CreatedAt) })
+	sortTracks(out)
 	return out, nil
 }
-func (r *Tracks) Search(query string) ([]domain.Track, error) {
+
+func (r *Tracks) Search(ctx context.Context, query string) ([]domain.Track, error) {
+	all, err := r.List(ctx)
+	if err != nil {
+		return nil, err
+	}
 	q := strings.ToLower(strings.TrimSpace(query))
-	all, _ := r.List()
 	if q == "" {
 		return all, nil
 	}
@@ -52,7 +75,11 @@ func (r *Tracks) Search(query string) ([]domain.Track, error) {
 	}
 	return out, nil
 }
-func (r *Tracks) Get(id string) (domain.Track, error) {
+
+func (r *Tracks) Get(ctx context.Context, id string) (domain.Track, error) {
+	if err := ctx.Err(); err != nil {
+		return domain.Track{}, err
+	}
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	t, ok := r.tracks[id]
@@ -60,4 +87,28 @@ func (r *Tracks) Get(id string) (domain.Track, error) {
 		return domain.Track{}, repository.ErrNotFound
 	}
 	return t, nil
+}
+
+func (r *Tracks) Delete(ctx context.Context, id string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if _, ok := r.tracks[id]; !ok {
+		return repository.ErrNotFound
+	}
+	delete(r.tracks, id)
+	return nil
+}
+
+func (r *Tracks) Ping(ctx context.Context) error { return ctx.Err() }
+
+func sortTracks(tracks []domain.Track) {
+	sort.Slice(tracks, func(i, j int) bool {
+		if tracks[i].CreatedAt.Equal(tracks[j].CreatedAt) {
+			return tracks[i].ID < tracks[j].ID
+		}
+		return tracks[i].CreatedAt.Before(tracks[j].CreatedAt)
+	})
 }

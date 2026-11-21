@@ -5,17 +5,32 @@
     "primary": "#7C3AED",
     "primary_dark": "#5B21B6",
     "accent": "#22D3EE",
+    "accent_light": "#67E8F9",
     "background": "#0B1020",
     "surface": "#151B2E",
     "surface_elevated": "#202943",
+    "surface_soft": "#2D3754",
+    "surface_highlight": "#3D4A6B",
     "text_primary": "#F8FAFC",
     "text_secondary": "#A5B4CC",
     "success": "#34D399",
+    "warning": "#FBBF24",
     "danger": "#FB7185"
   },
+  "typography": {
+    "interface": "Unageo",
+    "technical": "CodePro"
+  },
   "shape": {
-    "corner_radius_dp": 16,
-    "button_radius_dp": 12
+    "corner_small_dp": 12,
+    "corner_medium_dp": 18,
+    "corner_large_dp": 26,
+    "button_radius_dp": 18
+  },
+  "motion": {
+    "curve": "easeOutCubic",
+    "fast_ms": 180,
+    "standard_ms": 260
   },
   "logo": {
     "mark": "two overlapping sound-wave arcs forming an F",

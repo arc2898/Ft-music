@@ -1,38 +1,40 @@
-# FT-music rebuild
+# FT-music implementation notes
 
-This checkout contains the upstream **BloomeeTunes** application as the reference implementation and an independent Go foundation under [`go/`](go/). The new product name is **FT-music**.
+FT-music is maintained as a branded product with two independently testable parts: the Flutter client in `app/` and the shared Go API in `go/`. The client source is derived from a GPL-licensed upstream Flutter/Rust project; its required copyright and license notices must remain intact. Product-facing copy, metadata, documentation, and design tokens use FT-music branding.
 
-## Current baseline
+## Backend baseline
 
-The reference application is a Flutter client targeting Android, iOS, Linux, macOS, Windows, and Web. Its major capabilities include music discovery through plugins, playback, lyrics, playlists and library management, local media, offline downloads, caching, and settings. The upstream code uses a Rust/WASM plugin bridge and Isar persistence.
+The Go API is the shared service boundary for future clients. It is deliberately separate from the Flutter build and can be developed, tested, and deployed on its own.
 
-The Go foundation intentionally starts with a small, testable domain/API layer rather than copying Flutter source. It currently provides:
+Current backend capabilities:
 
-- a Go 1.22 module;
-- an in-memory track library with metadata search;
-- JSON endpoints for health, library listing/search, track lookup, and adding tracks;
-- unit tests for core library behavior.
+- validated, normalized track metadata with consistent domain constraints;
+- context-aware memory and SQLite repositories;
+- SQLite initialization, WAL mode for file databases, busy timeout, and readiness checks;
+- a provider registry with isolated provider failures, parallel search aggregation, de-duplication, and stream URL validation;
+- versioned JSON routes for health, readiness, library CRUD, remote search, provider discovery, and stream resolution;
+- bounded request bodies, strict JSON decoding, pagination, request IDs, security headers, API-key protection, and graceful shutdown.
 
-## Run
+No streaming provider is enabled by default. A provider adapter must be explicitly registered and must use an authorized API with documented licensing, attribution, rate limits, and regional restrictions.
+
+## Run and test the backend
 
 ```bash
 cd go
-gofmt -w ./cmd ./internal
 go test ./...
 go run ./cmd/ft-music
 ```
 
-The API listens on `:8080` by default. Set `FT_MUSIC_ADDR` to change the bind address.
+Configuration:
 
-## Suggested migration sequence
+| Variable | Default | Purpose |
+|---|---|---|
+| `FT_MUSIC_ADDR` | `127.0.0.1:8080` | HTTP bind address |
+| `FT_MUSIC_DB` | `ft-music.db` | SQLite database path |
+| `FT_MUSIC_API_TOKEN` | unset | Bearer token; required for non-loopback binds |
 
-1. Define stable domain contracts for tracks, albums, artists, playlists, lyrics, downloads, and plugin providers.
-2. Replace the in-memory library with SQLite and migrations.
-3. Add a provider interface and one compliant provider adapter; keep provider-specific code outside the domain package.
-4. Implement playback/download workers behind interfaces so desktop, mobile, and web clients can share the API.
-5. Add authentication, user settings, cache invalidation, and synchronization only after the single-user flow is stable.
-6. Build the FT-music client separately against the versioned API.
+See [`../go/API.md`](../go/API.md) for endpoint contracts and operational behavior.
 
-## License and branding
+## Branding and source lineage
 
-The cloned upstream project is licensed under **GNU GPL v2 or later**. Any derivative work based on its covered source must preserve the applicable copyright notices, license text, and source-distribution obligations. This Go foundation is newly authored and carries GPL-2.0-or-later headers; review third-party dependencies and artwork before publishing a rebranded distribution. “BloomeeTunes” and related upstream branding should not be presented as FT-music branding.
+[`../brand/theme.json`](../brand/theme.json) is the canonical FT-music brand token file. The Flutter theme follows its violet/cyan palette, typography, shape, and motion tokens. Keep FT-music as the public product identity. Preserve upstream copyright notices, license files, and internal compatibility identifiers required by generated Flutter/Rust bridge code; do not present upstream names as FT-music product branding.

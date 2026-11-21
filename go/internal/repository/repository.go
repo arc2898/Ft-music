@@ -5,15 +5,19 @@
 package repository
 
 import (
+	"context"
 	"errors"
-	"github.com/ft-music/ft-music/internal/domain"
+
+	"github.com/arc2898/ft-music/go/internal/domain"
 )
 
 var ErrNotFound = errors.New("track not found")
 
 type TrackRepository interface {
-	Add(domain.Track) (domain.Track, error)
-	List() ([]domain.Track, error)
-	Search(query string) ([]domain.Track, error)
-	Get(id string) (domain.Track, error)
+	Add(context.Context, domain.Track) (domain.Track, error)
+	List(context.Context) ([]domain.Track, error)
+	Search(context.Context, string) ([]domain.Track, error)
+	Get(context.Context, string) (domain.Track, error)
+	Delete(context.Context, string) error
+	Ping(context.Context) error
 }

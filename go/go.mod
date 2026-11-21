@@ -1,4 +1,4 @@
-module github.com/ft-music/ft-music
+module github.com/arc2898/ft-music/go
 
 go 1.25.0
 

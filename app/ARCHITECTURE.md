@@ -1,6 +1,8 @@
-# Bloomee Architecture
+# FT-music Client Architecture
 
-> Authoritative reference for all contributors. All code must conform to the rules in this document.
+> Client architecture reference for FT-music contributors.
+>
+> This document describes the Flutter client. Some legacy class and FFI identifiers are retained for source/bridge compatibility; they are not product-facing brand names. Preserve all upstream copyright and license notices.
 
 ## Table of Contents
 

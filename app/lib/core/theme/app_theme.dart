@@ -13,19 +13,19 @@ class AppTheme {
   static const fontAwesomeSolidFont =
       TextStyle(fontFamily: 'FontAwesome-Solids');
 
-  static const themeColor = Color(0xFF111513);
-  static const surfaceColor = Color(0xFF191E1B);
-  static const surfaceElevated = Color(0xFF222923);
-  static const surfaceSoft = Color(0xFF2C352E);
-  static const surfaceHighlight = Color(0xFF354137);
-  static const primaryColor1 = Color(0xFFF3F7EF);
-  static const primaryColor2 = Color(0xFFB8C4B8);
-  static const accentColor1 = Color(0xFFE1F7B6);
-  static const accentColor1light = Color(0xFFF0FFD6);
-  static const accentColor2 = Color(0xFFBFE98D);
-  static const successColor = Color(0xFFBFE98D);
-  static const warningColor = Color(0xFFF4C96B);
-  static const errorColor = Color(0xFFFF938A);
+  static const themeColor = Color(0xFF0B1020);
+  static const surfaceColor = Color(0xFF151B2E);
+  static const surfaceElevated = Color(0xFF202943);
+  static const surfaceSoft = Color(0xFF2D3754);
+  static const surfaceHighlight = Color(0xFF3D4A6B);
+  static const primaryColor1 = Color(0xFFF8FAFC);
+  static const primaryColor2 = Color(0xFFA5B4CC);
+  static const accentColor1 = Color(0xFF22D3EE);
+  static const accentColor1light = Color(0xFF67E8F9);
+  static const accentColor2 = Color(0xFF7C3AED);
+  static const successColor = Color(0xFF34D399);
+  static const warningColor = Color(0xFFFBBF24);
+  static const errorColor = Color(0xFFFB7185);
 
   static const cornerSmall = 12.0;
   static const cornerMedium = 18.0;
@@ -42,8 +42,8 @@ class AppTheme {
       primary: accentColor2,
       secondary: accentColor1,
       tertiary: surfaceHighlight,
-      onPrimary: const Color(0xFF182014),
-      onSecondary: const Color(0xFF182014),
+      onPrimary: const Color(0xFFFFFFFF),
+      onSecondary: const Color(0xFF06212B),
       onSurface: primaryColor1,
       error: errorColor,
     );
@@ -57,7 +57,7 @@ class AppTheme {
       fontFamily: 'Unageo',
       colorScheme: scheme,
       primaryColor: accentColor2,
-      primaryColorDark: accentColor2,
+      primaryColorDark: const Color(0xFF5B21B6),
       splashFactory: InkSparkle.splashFactory,
       visualDensity: VisualDensity.standard,
       iconTheme: const IconThemeData(color: primaryColor1, size: 22),
@@ -101,7 +101,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: accentColor2,
-          foregroundColor: const Color(0xFF182014),
+          foregroundColor: const Color(0xFFFFFFFF),
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           shape: RoundedRectangleBorder(
@@ -113,7 +113,7 @@ class AppTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: accentColor2,
-          foregroundColor: const Color(0xFF182014),
+          foregroundColor: const Color(0xFFFFFFFF),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(cornerMedium),
@@ -187,7 +187,7 @@ class AppTheme {
       ),
       textSelectionTheme: const TextSelectionThemeData(
         cursorColor: accentColor2,
-        selectionColor: Color(0x668DBB61),
+        selectionColor: Color(0x667C3AED),
         selectionHandleColor: accentColor2,
       ),
       switchTheme: SwitchThemeData(
