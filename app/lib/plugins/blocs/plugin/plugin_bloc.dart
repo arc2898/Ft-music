@@ -8,7 +8,6 @@ import 'package:ft_music/services/db/db_provider.dart';
 import 'package:ft_music/plugins/blocs/plugin/plugin_event.dart';
 import 'package:ft_music/plugins/blocs/plugin/plugin_state.dart';
 import 'package:ft_music/plugins/errors/plugin_exceptions.dart';
-import 'package:ft_music/plugins/services/plugin_repository_service.dart';
 import 'package:ft_music/services/plugin/plugin_event_bus.dart';
 import 'package:ft_music/services/plugin/plugin_load_state_service.dart';
 import 'package:ft_music/services/plugin/plugin_service.dart';
@@ -29,8 +28,6 @@ class PluginBloc extends Bloc<PluginEvent, PluginState> {
   final PluginService _pluginService;
   final PluginEventBus _eventBus;
   final PluginLoadStateService _loadStateService;
-  final PluginRepositoryService _repositoryService;
-  final SettingsDAO _settingsDao;
 
   StreamSubscription<PluginManagerEvent>? _eventSubscription;
   Set<String> _preferredAutoLoadIds = <String>{};
@@ -82,15 +79,10 @@ class PluginBloc extends Bloc<PluginEvent, PluginState> {
     required PluginService pluginService,
     required PluginEventBus eventBus,
     PluginLoadStateService? loadStateService,
-    PluginRepositoryService? repositoryService,
-    SettingsDAO? settingsDao,
   })  : _pluginService = pluginService,
         _eventBus = eventBus,
         _loadStateService = loadStateService ??
             PluginLoadStateService(SettingsDAO(DBProvider.db)),
-        _repositoryService = repositoryService ??
-            PluginRepositoryService(settingsDao: SettingsDAO(DBProvider.db)),
-        _settingsDao = settingsDao ?? SettingsDAO(DBProvider.db),
         super(const PluginState.initial()) {
     // Register event handlers.
     on<InitializePluginSystem>(_onInitialize);
@@ -175,17 +167,6 @@ class PluginBloc extends Bloc<PluginEvent, PluginState> {
         _pluginService,
         SettingsDAO(DBProvider.db),
       ));
-
-      // Trigger background plugin sync AFTER auto-load has had a chance to run.
-      // We delay long enough for AutoLoadPlugins to complete so that
-      // syncRepositoriesAndAutoUpdate sees the correct set of loaded plugins
-      // and can properly unload them before applying any updates.
-      // The 30-minute cooldown inside syncOnAppOpenIfDue prevents spamming.
-      unawaited(Future<void>.delayed(const Duration(seconds: 5), () {
-        if (!isClosed) {
-          unawaited(_syncPluginRepositoriesIfDue());
-        }
-      }));
 
       log('PluginBloc initialized: ${available.length} available, ${loaded.length} loaded',
           name: 'PluginBloc');
@@ -625,25 +606,6 @@ class PluginBloc extends Bloc<PluginEvent, PluginState> {
         emit(state.copyWith(error: message, clearSuccessMessage: true));
       },
     );
-  }
-
-  // ── Background Plugin Sync ─────────────────────────────────────────────────
-
-  Future<void> _syncPluginRepositoriesIfDue() async {
-    try {
-      await PluginBootstrapService.syncOnAppOpenIfDue(
-        pluginService: _pluginService,
-        repositoryService: _repositoryService,
-        settingsDao: _settingsDao,
-      );
-      // Refresh UI after sync to reflect any updates.
-      if (!isClosed) {
-        add(const RefreshPlugins());
-      }
-    } catch (e, stack) {
-      log('Background plugin sync failed',
-          error: e, stackTrace: stack, name: 'PluginBloc');
-    }
   }
 
   Future<void> _cleanupPluginStorage(String pluginId) async {

@@ -10,11 +10,6 @@ import 'package:ft_music/services/plugin/plugin_event_bus.dart';
 import 'package:ft_music/src/rust/api/plugin/events.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:url_launcher/url_launcher.dart';
-
-Future<void> openURL(String url) async {
-  launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-}
 
 class GlobalEventListener extends StatefulWidget {
   final Widget child;
@@ -115,23 +110,6 @@ class _GlobalEventListenerState extends State<GlobalEventListener> {
       listener: (context, state) {
         final dialogContext = widget.navigatorKey.currentContext ?? context;
         switch (state.runtimeType) {
-          case UpdateAvailable:
-            final s = state as UpdateAvailable;
-            final l10n = AppLocalizations.of(dialogContext)!;
-            log("Update Available: ${s.newVersion}+${s.newBuild}");
-            showBloomeeDialog(
-              context: dialogContext,
-              title: l10n.dialogUpdateAvailable,
-              subtitle: l10n.updateAvailableBody(s.newVersion, s.newBuild),
-              icon: Icons.system_update_rounded,
-              actions: [
-                BloomeeDialogAction.text(l10n.buttonLater),
-                BloomeeDialogAction.filled(l10n.dialogUpdateNow, onPressed: () {
-                  openURL(s.downloadUrl);
-                }),
-              ],
-            );
-            break;
           case AlertDialogState:
             final s = state as AlertDialogState;
             final l10n = AppLocalizations.of(dialogContext)!;

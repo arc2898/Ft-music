@@ -7,7 +7,6 @@ import 'package:ft_music/blocs/lastdotfm/lastdotfm_cubit.dart';
 import 'package:ft_music/blocs/local_music/cubit/local_music_cubit.dart';
 import 'package:ft_music/blocs/lyrics/lyrics_cubit.dart';
 import 'package:ft_music/blocs/mini_player/mini_player_cubit.dart';
-import 'package:ft_music/blocs/notification/notification_cubit.dart';
 import 'package:ft_music/blocs/history/cubit/history_cubit.dart';
 import 'package:ft_music/blocs/explore/cubit/recently_cubit.dart';
 import 'package:ft_music/blocs/player_overlay/player_overlay_cubit.dart';
@@ -21,7 +20,6 @@ import 'package:ft_music/services/db/dao/cache_dao.dart';
 import 'package:ft_music/services/db/dao/download_dao.dart';
 import 'package:ft_music/services/db/dao/history_dao.dart';
 import 'package:ft_music/services/db/dao/lyrics_dao.dart';
-import 'package:ft_music/services/db/dao/notification_dao.dart';
 import 'package:ft_music/services/db/dao/library_dao.dart';
 import 'package:ft_music/services/db/dao/playlist_dao.dart';
 import 'package:ft_music/services/db/dao/search_history_dao.dart';
@@ -63,7 +61,6 @@ import 'package:ft_music/screens/widgets/onboarding_overlay.dart';
 import 'package:ft_music/screens/widgets/plugin_bootstrap_overlay.dart';
 import 'package:ft_music/services/onboarding_service.dart';
 import 'package:ft_music/services/plugin_bootstrap_service.dart';
-import 'package:ft_music/plugins/services/plugin_repository_service.dart';
 import 'package:ft_music/services/shared_url_resolver_service.dart';
 
 void processIncomingIntent(SharedMedia sharedMedia) {
@@ -305,8 +302,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       unawaited(_ensurePlayerHealthyOnResume());
-      // Check for plugin updates when app resumes (30-min cooldown enforced).
-      unawaited(_checkPluginUpdatesOnResume());
     }
   }
 
@@ -319,21 +314,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       player.syncPublicState();
     } catch (error, stackTrace) {
       debugPrint('Player health check on resume failed: $error\n$stackTrace');
-    }
-  }
-
-  Future<void> _checkPluginUpdatesOnResume() async {
-    try {
-      final settingsDao = SettingsDAO(DBProvider.db);
-      final repositoryService =
-          PluginRepositoryService(settingsDao: settingsDao);
-      await PluginBootstrapService.syncOnAppOpenIfDue(
-        pluginService: ServiceLocator.pluginService,
-        repositoryService: repositoryService,
-        settingsDao: settingsDao,
-      );
-    } catch (error, stackTrace) {
-      debugPrint('Plugin update check on resume failed: $error\n$stackTrace');
     }
   }
 
@@ -438,8 +418,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           create: (context) => PluginBloc(
             pluginService: ServiceLocator.pluginService,
             eventBus: ServiceLocator.pluginEventBus,
-            repositoryService: ServiceLocator.pluginRepositoryService,
-            settingsDao: SettingsDAO(DBProvider.db),
           )..add(const InitializePluginSystem()),
           lazy: false,
         ),
@@ -456,11 +434,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             SettingsRepository(SettingsDAO(DBProvider.db)),
           ),
           lazy: false,
-        ),
-        BlocProvider(
-          create: (context) => NotificationCubit(
-            notificationDao: NotificationDAO(DBProvider.db),
-          ),
         ),
         BlocProvider(
             create: (context) => TimerBloc(

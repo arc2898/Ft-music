@@ -63,14 +63,36 @@ Future<void> bootstrapApp() async {
         error: e, stackTrace: stack, name: 'Bootstrap');
   }
 
-  // Auto-scan local music folders if enabled (fire-and-forget).
+  // Defer disk-intensive library discovery until after the first UI frame.
+  // Skip repeat scans for 12 hours; manual scans remain available in Local.
   try {
     final settingsDao = SettingsDAO(DBProvider.db);
     final autoScan =
         await settingsDao.getSettingBool(SettingKeys.localMusicAutoScan) ??
             true;
-    if (autoScan) {
-      unawaited(LocalMusicService.create().scanAndPersist());
+    final lastScanAt = DateTime.tryParse(
+      (await settingsDao.getSettingStr(SettingKeys.localMusicLastScan)) ?? '',
+    );
+    final scanAge = lastScanAt == null
+        ? null
+        : DateTime.now().difference(lastScanAt);
+    final scanIsDue = scanAge == null ||
+        scanAge.isNegative ||
+        scanAge >= const Duration(hours: 12);
+
+    if (autoScan && scanIsDue) {
+      unawaited(Future<void>.delayed(const Duration(seconds: 5), () async {
+        try {
+          await LocalMusicService.create().scanAndPersist();
+        } catch (error, stackTrace) {
+          log(
+            'Background local music scan failed',
+            error: error,
+            stackTrace: stackTrace,
+            name: 'Bootstrap',
+          );
+        }
+      }));
     }
   } catch (e) {
     log('Local music auto-scan skipped', error: e, name: 'Bootstrap');
