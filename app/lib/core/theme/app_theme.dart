@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 /// FT-music design tokens. Screens should prefer Theme.of(context) so both
 /// palettes respond to the persisted appearance setting.
-class AppTheme {
+// ignore: camel_case_types
+class Default_Theme {
   static const primaryTextStyle = TextStyle(fontFamily: 'ReThink-Sans');
   static const secondoryTextStyle = TextStyle(fontFamily: 'ReThink-Sans');
   static const secondoryTextStyleMedium =
@@ -273,6 +274,3 @@ class AppTheme {
   }
 }
 
-// Backward-compatible alias used throughout the existing client.
-// ignore: camel_case_types
-typedef Default_Theme = AppTheme;

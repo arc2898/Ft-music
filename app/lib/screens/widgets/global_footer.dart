@@ -229,6 +229,9 @@ class VerticalNavBar extends StatelessWidget {
       minWidth: 70,
       onDestinationSelected: navigationShell.goBranch,
       groupAlignment: 0.0,
+      selectedIconTheme: IconThemeData(
+        color: Theme.of(context).colorScheme.onPrimary,
+      ),
       unselectedIconTheme: IconThemeData(
         color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),

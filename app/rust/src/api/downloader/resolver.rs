@@ -98,7 +98,7 @@ pub async fn resolve_stream(
             .await
             .into_iter()
             .find(|plugin| {
-                plugin.id() == plugin_id
+                plugin.id() == plugin_id.as_str()
                     && plugin.plugin_type == PluginType::ContentResolver
             })
             .ok_or_else(|| format!("Content resolver '{plugin_id}' is not installed"))?;
