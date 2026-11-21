@@ -31,11 +31,6 @@ class SettingsCubit extends Cubit<SettingsState> {
   // where the cubit is closed during startup (app killed mid-init).
   Future<void> _initSettings() async {
     final results = await Future.wait([
-      // [0] autoUpdateNotify
-      _readSetting(
-        () => _settingsRepo.getSettingBool(SettingKeys.autoUpdateNotify),
-        SettingKeys.autoUpdateNotify,
-      ),
       // [1] autoSlideCharts
       _readSetting(
         () => _settingsRepo.getSettingBool(SettingKeys.autoSlideCharts),
@@ -172,14 +167,14 @@ class SettingsCubit extends Cubit<SettingsState> {
     ]);
 
     // Normalize stream quality labels.
-    final rawDownQ = results[3] as String?;
+    final rawDownQ = results[2] as String?;
     final normalizedDownQ = normalizeStoredStreamQualityLabel(rawDownQ,
         fallback: AudioStreamQualityPreference.medium.label);
     if (rawDownQ != normalizedDownQ) {
       _settingsRepo.putSettingStr(SettingKeys.downQuality, normalizedDownQ);
     }
 
-    final rawStrmQ = results[4] as String?;
+    final rawStrmQ = results[3] as String?;
     final normalizedStrmQ = normalizeStoredStreamQualityLabel(rawStrmQ,
         fallback: AudioStreamQualityPreference.high.label);
     if (rawStrmQ != normalizedStrmQ) {
@@ -188,7 +183,7 @@ class SettingsCubit extends Cubit<SettingsState> {
 
     // Parse chart map.
     Map chartMap = {};
-    final chartJson = results[16] as String?;
+    final chartJson = results[15] as String?;
     if (chartJson != null) {
       try {
         chartMap = jsonDecode(chartJson);
@@ -196,7 +191,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     }
 
     // Normalize crossfade duration.
-    final cfStr = results[17] as String?;
+    final cfStr = results[16] as String?;
     final crossfadeSeconds = int.tryParse((cfStr ?? '').trim()) ?? 2;
     if (cfStr != crossfadeSeconds.toString()) {
       _settingsRepo.putSettingStr(
@@ -205,7 +200,7 @@ class SettingsCubit extends Cubit<SettingsState> {
 
     // Parse EQ gains.
     List<double> eqGains = List<double>.filled(10, 0.0);
-    final gainsJson = results[19] as String?;
+    final gainsJson = results[18] as String?;
     if (gainsJson != null) {
       try {
         final decoded = jsonDecode(gainsJson) as List;
@@ -219,7 +214,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     // Parse plugin priority lists.
     List<String> resolverPriority = const [];
     try {
-      final rj = results[24] as String?;
+      final rj = results[23] as String?;
       if (rj != null && rj.isNotEmpty) {
         resolverPriority = (jsonDecode(rj) as List).cast<String>();
       }
@@ -227,14 +222,14 @@ class SettingsCubit extends Cubit<SettingsState> {
 
     List<String> lyricsPriority = const [];
     try {
-      final lj = results[25] as String?;
+      final lj = results[24] as String?;
       if (lj != null && lj.isNotEmpty) {
         lyricsPriority = (jsonDecode(lj) as List).cast<String>();
       }
     } catch (_) {}
 
     // Normalize country code.
-    final rawCountry = results[14] as String?;
+    final rawCountry = results[13] as String?;
     final normalizedCountry =
         CountryInfoService.normalizeCountryCode(rawCountry);
     final resolvedCountry = normalizedCountry.isNotEmpty
@@ -242,7 +237,7 @@ class SettingsCubit extends Cubit<SettingsState> {
         : CountryInfoService.defaultCountryCode;
 
     // Validate EQ source.
-    final rawEqSource = results[21] as String?;
+    final rawEqSource = results[20] as String?;
     final eqSource = rawEqSource == EqSourceValues.device
         ? EqSourceValues.device
         : EqSourceValues.builtin;
@@ -253,33 +248,32 @@ class SettingsCubit extends Cubit<SettingsState> {
     // Single emit: one widget tree rebuild instead of 20+.
     emit(SettingsState(
       settingsReady: true,
-      autoUpdateNotify: (results[0] as bool?) ?? false,
-      autoSlideCharts: (results[1] as bool?) ?? true,
-      downPath: results[2] as String,
+      autoSlideCharts: (results[0] as bool?) ?? true,
+      downPath: results[1] as String,
       downQuality: normalizedDownQ,
       strmQuality: normalizedStrmQ,
-      backupPath: results[10] as String,
-      autoBackup: (results[11] as bool?) ?? false,
-      historyClearTime: (results[5] as String?) ?? '30',
-      autoGetCountry: (results[12] as bool?) ?? true,
-      languageCode: (results[13] as String?) ?? '',
+      backupPath: results[9] as String,
+      autoBackup: (results[10] as bool?) ?? false,
+      historyClearTime: (results[4] as String?) ?? '30',
+      autoGetCountry: (results[11] as bool?) ?? true,
+      languageCode: (results[12] as String?) ?? '',
       countryCode: resolvedCountry,
-      autoSaveLyrics: (results[15] as bool?) ?? false,
-      lFMPicks: (results[9] as bool?) ?? false,
-      lastFMScrobble: (results[6] as bool?) ?? false,
+      autoSaveLyrics: (results[14] as bool?) ?? false,
+      lFMPicks: (results[8] as bool?) ?? false,
+      lastFMScrobble: (results[5] as bool?) ?? false,
       chartMap: Map.from(chartMap),
-      autoPlay: (results[7] as bool?) ?? true,
-      autoResolveUnavailableTracks: (results[8] as bool?) ?? true,
+      autoPlay: (results[6] as bool?) ?? true,
+      autoResolveUnavailableTracks: (results[7] as bool?) ?? true,
       crossfadeDuration: crossfadeSeconds,
-      eqEnabled: (results[18] as bool?) ?? false,
+      eqEnabled: (results[17] as bool?) ?? false,
       eqBandGains: eqGains,
-      eqPreset: (results[20] as String?) ?? 'Flat',
+      eqPreset: (results[19] as String?) ?? 'Flat',
       eqSource: eqSource,
-      homePluginId: (results[22] as String?) ?? '',
-      searchPluginId: (results[23] as String?) ?? '',
+      homePluginId: (results[21] as String?) ?? '',
+      searchPluginId: (results[22] as String?) ?? '',
       resolverPriority: resolverPriority,
       lyricsPriority: lyricsPriority,
-      suggestionPluginId: (results[26] as String?) ?? '',
+      suggestionPluginId: (results[25] as String?) ?? '',
     ));
   }
 
@@ -389,11 +383,6 @@ class SettingsCubit extends Cubit<SettingsState> {
   void setAutoGetCountry(bool v) {
     _settingsRepo.putSettingBool(SettingKeys.autoGetCountry, v);
     emit(state.copyWith(autoGetCountry: v));
-  }
-
-  void setAutoUpdateNotify(bool v) {
-    _settingsRepo.putSettingBool(SettingKeys.autoUpdateNotify, v);
-    emit(state.copyWith(autoUpdateNotify: v));
   }
 
   void setAutoSlideCharts(bool v) {

@@ -3,7 +3,6 @@ part of 'settings_cubit.dart';
 
 class SettingsState extends Equatable {
   final bool settingsReady; // true only after all settings loaded from DB
-  final bool autoUpdateNotify;
   final bool autoSlideCharts;
   final String downPath;
   final String downQuality;
@@ -37,7 +36,6 @@ class SettingsState extends Equatable {
 
   const SettingsState({
     required this.settingsReady,
-    required this.autoUpdateNotify,
     required this.autoSlideCharts,
     required this.downPath,
     required this.downQuality,
@@ -68,7 +66,6 @@ class SettingsState extends Equatable {
 
   SettingsState copyWith({
     bool? settingsReady,
-    bool? autoUpdateNotify,
     bool? autoSlideCharts,
     String? downPath,
     String? downQuality,
@@ -98,7 +95,6 @@ class SettingsState extends Equatable {
   }) {
     return SettingsState(
       settingsReady: settingsReady ?? this.settingsReady,
-      autoUpdateNotify: autoUpdateNotify ?? this.autoUpdateNotify,
       autoSlideCharts: autoSlideCharts ?? this.autoSlideCharts,
       downPath: downPath ?? this.downPath,
       downQuality: downQuality ?? this.downQuality,
@@ -138,7 +134,6 @@ class SettingsState extends Equatable {
   @override
   List<Object?> get props => [
         settingsReady,
-        autoUpdateNotify,
         autoSlideCharts,
         downPath,
         downQuality,
@@ -172,7 +167,6 @@ class SettingsInitial extends SettingsState {
   SettingsInitial()
       : super(
           settingsReady: false,
-          autoUpdateNotify: false,
           autoSlideCharts: true,
           downPath: "",
           downQuality: "Medium",

@@ -498,9 +498,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           ),
         ),
         BlocProvider(
-          create: (context) => GlobalEventsCubit(
-            settingsDao: SettingsDAO(DBProvider.db),
-          ),
+          create: (context) => GlobalEventsCubit(),
         ),
         BlocProvider(
           create: (context) => PlayerOverlayCubit(),

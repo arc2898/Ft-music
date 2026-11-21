@@ -138,7 +138,7 @@ class ContentBloc extends Bloc<ContentEvent, ContentState> {
   }
 
   String _normalizeSearchText(String value) =>
-      value.trim().toLowerCase().replaceAll(RegExp(r'\\s+'), ' ');
+      value.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
 
   String _searchItemKey(MediaItem item) => switch (item) {
         MediaItem_Track(:final field0) =>
