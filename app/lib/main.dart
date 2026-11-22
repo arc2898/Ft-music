@@ -201,19 +201,35 @@ class _StartupSplash extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 86,
-              height: 86,
-              padding: const EdgeInsets.all(14),
+              width: 104,
+              height: 104,
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Default_Theme.accentColor2,
-                borderRadius: BorderRadius.circular(26),
+                color: const Color(0xFF101707),
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(
+                  color: Default_Theme.accentColor2.withValues(alpha: .32),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Default_Theme.accentColor2.withValues(alpha: .10),
+                    blurRadius: 28,
+                    spreadRadius: 2,
+                  ),
+                ],
               ),
-              child: Image.asset('assets/icons/ft_music_mark.png'),
+              child: Image.asset(
+                'assets/icons/ft_music_mark.png',
+                fit: BoxFit.contain,
+                semanticLabel: 'FT-music',
+              ),
             ),
             const SizedBox(height: 22),
             const Text(
               'FT-music',
               style: TextStyle(
+                fontFamily: 'Unageo',
+                decoration: TextDecoration.none,
                 color: Default_Theme.primaryColor1,
                 fontSize: 25,
                 fontWeight: FontWeight.w800,
