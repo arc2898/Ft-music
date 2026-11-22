@@ -138,10 +138,10 @@ class _PluginBootstrapOverlayState extends State<PluginBootstrapOverlay>
                 decoration: TextDecoration.none,
               ),
               child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: _maxContentWidth),
-              child: ValueListenableBuilder<_Phase>(
-                valueListenable: _phase,
-                builder: (context, phase, _) {
+                constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+                child: ValueListenableBuilder<_Phase>(
+                  valueListenable: _phase,
+                  builder: (context, phase, _) {
                   return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 400),
                     child: phase == _Phase.noInternet
@@ -160,9 +160,9 @@ class _PluginBootstrapOverlayState extends State<PluginBootstrapOverlay>
                                 l10n: l10n,
                               ),
                   );
-                },
+                  },
+                ),
               ),
-            ),
             ),
           ),
         ),
