@@ -142,24 +142,24 @@ class _PluginBootstrapOverlayState extends State<PluginBootstrapOverlay>
                 child: ValueListenableBuilder<_Phase>(
                   valueListenable: _phase,
                   builder: (context, phase, _) {
-                  return AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 400),
-                    child: phase == _Phase.noInternet
-                        ? _NoInternetBody(
-                            onRetry: _run,
-                            onExit: _exitApp,
-                          )
-                        : phase == _Phase.failed
-                            ? _ErrorBody(
-                                onRetry: _run,
-                              )
-                            : _SpinnerBody(
-                                pulse: _pulse,
-                                progress: _progress,
-                                isDone: phase == _Phase.success,
-                                l10n: l10n,
-                              ),
-                  );
+                    return AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 400),
+                      child: phase == _Phase.noInternet
+                          ? _NoInternetBody(
+                              onRetry: _run,
+                              onExit: _exitApp,
+                            )
+                          : phase == _Phase.failed
+                              ? _ErrorBody(
+                                  onRetry: _run,
+                                )
+                              : _SpinnerBody(
+                                  pulse: _pulse,
+                                  progress: _progress,
+                                  isDone: phase == _Phase.success,
+                                  l10n: l10n,
+                                ),
+                    );
                   },
                 ),
               ),
