@@ -3,6 +3,7 @@ import 'package:ft_music/blocs/explore/cubit/explore_cubits.dart';
 import 'package:ft_music/blocs/internet_connectivity/cubit/connectivity_cubit.dart';
 import 'package:ft_music/blocs/lastdotfm/lastdotfm_cubit.dart';
 import 'package:ft_music/blocs/media_player/bloomee_player_cubit.dart';
+import 'package:ft_music/blocs/downloader/cubit/downloader_cubit.dart';
 import 'package:ft_music/blocs/settings_cubit/cubit/settings_cubit.dart';
 import 'package:ft_music/core/di/service_locator.dart';
 import 'package:ft_music/core/models/exported.dart';
@@ -13,6 +14,8 @@ import 'package:ft_music/plugins/blocs/content/content_state.dart';
 import 'package:ft_music/plugins/blocs/plugin/plugin_bloc.dart';
 import 'package:ft_music/plugins/blocs/plugin/plugin_state.dart';
 import 'package:ft_music/screens/screen/home_views/recents_view.dart';
+import 'package:ft_music/screens/screen/offline_screen.dart';
+import 'package:ft_music/screens/screen/chart/carousal_widget.dart';
 import 'package:ft_music/screens/widgets/more_bottom_sheet.dart';
 import 'package:ft_music/screens/widgets/sign_board_widget.dart';
 import 'package:ft_music/screens/widgets/song_tile.dart';
@@ -181,7 +184,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 SliverList(
                   delegate: SliverChildListDelegate(
                     [
+                      const CaraouselWidget(),
                       const HomeCategoryCarousel(),
+                      const _HomeOfflineSummaryCard(),
                       Padding(
                         padding: const EdgeInsets.only(top: 15.0),
                         child: SizedBox(
@@ -403,9 +408,80 @@ class _ExploreScreenState extends State<ExploreScreen> {
               ],
             ),
           ),
-          backgroundColor: Default_Theme.themeColor,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         ),
       ),
+    );
+  }
+}
+
+class _HomeOfflineSummaryCard extends StatelessWidget {
+  const _HomeOfflineSummaryCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<DownloaderCubit, DownloaderState>(
+      builder: (context, state) {
+        final colors = Theme.of(context).colorScheme;
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(18, 12, 18, 4),
+          child: Material(
+            color: colors.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(20),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(20),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const OfflineScreen()),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: colors.primary.withValues(alpha: .12),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Icon(
+                        Icons.offline_pin_rounded,
+                        color: colors.primary,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Offline library',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: colors.onSurface,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${state.downloaded.length} saved • ${state.downloads.length} in progress',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: colors.onSurfaceVariant,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(Icons.arrow_forward_ios_rounded,
+                        size: 16, color: colors.onSurfaceVariant),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -460,8 +536,8 @@ class CustomDiscoverBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverAppBar(
       floating: true,
-      surfaceTintColor: Default_Theme.themeColor,
-      backgroundColor: Default_Theme.themeColor,
+      surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       title: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
@@ -496,10 +572,10 @@ class _FTMusicBrand extends StatelessWidget {
         Text(
           'FT-music',
           style: Default_Theme.secondoryTextStyleMedium.merge(
-            const TextStyle(
+            TextStyle(
               fontSize: 25,
               letterSpacing: -0.6,
-              color: Default_Theme.primaryColor1,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ),
@@ -522,9 +598,9 @@ class TimerIcon extends StatelessWidget {
           MaterialPageRoute(builder: (context) => const TimerView()),
         );
       },
-      icon: const Icon(
+      icon: Icon(
         Icons.timer_outlined,
-        color: Default_Theme.primaryColor1,
+        color: Theme.of(context).colorScheme.onSurface,
         size: 30.0,
       ),
     );
@@ -545,9 +621,9 @@ class SettingsIcon extends StatelessWidget {
           MaterialPageRoute(builder: (context) => const SettingsView()),
         );
       },
-      icon: const Icon(
+      icon: Icon(
         Icons.settings_rounded,
-        color: Default_Theme.primaryColor1,
+        color: Theme.of(context).colorScheme.onSurface,
         size: 30.0,
       ),
     );

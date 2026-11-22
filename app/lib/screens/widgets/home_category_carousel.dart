@@ -48,7 +48,7 @@ class HomeCategoryCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = MediaQuery.sizeOf(context).width < 600 ? 300.0 : 340.0;
+    final height = MediaQuery.sizeOf(context).width < 600 ? 238.0 : 270.0;
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: CarouselSlider.builder(
@@ -60,9 +60,9 @@ class HomeCategoryCarousel extends StatelessWidget {
         options: CarouselOptions(
           height: height,
           viewportFraction: MediaQuery.sizeOf(context).width < 600 ? .76 : .42,
-          enlargeCenterPage: true,
-          enlargeFactor: .16,
-          autoPlay: true,
+          enlargeCenterPage: false,
+          enlargeFactor: .08,
+          autoPlay: false,
           autoPlayInterval: const Duration(seconds: 4),
           pauseAutoPlayOnTouch: true,
           enableInfiniteScroll: true,

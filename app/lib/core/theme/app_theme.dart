@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-/// FT-music design tokens. All screens should use these values instead of
-/// introducing one-off colors, radii, or motion curves.
+/// FT-music design tokens. Screens should prefer Theme.of(context) so both
+/// palettes respond to the persisted appearance setting.
+/// Keep the original public class name for existing widgets and extensions.
 class AppTheme {
   static const primaryTextStyle = TextStyle(fontFamily: 'Unageo');
   static const secondoryTextStyle = TextStyle(fontFamily: 'Unageo');
@@ -13,17 +14,18 @@ class AppTheme {
   static const fontAwesomeSolidFont =
       TextStyle(fontFamily: 'FontAwesome-Solids');
 
-  static const themeColor = Color(0xFF0B1020);
-  static const surfaceColor = Color(0xFF151B2E);
-  static const surfaceElevated = Color(0xFF202943);
-  static const surfaceSoft = Color(0xFF2D3754);
-  static const surfaceHighlight = Color(0xFF3D4A6B);
-  static const primaryColor1 = Color(0xFFF8FAFC);
-  static const primaryColor2 = Color(0xFFA5B4CC);
-  static const accentColor1 = Color(0xFF22D3EE);
-  static const accentColor1light = Color(0xFF67E8F9);
-  static const accentColor2 = Color(0xFF7C3AED);
-  static const successColor = Color(0xFF34D399);
+  // Dark palette: deep olive-black surfaces with a high-contrast lime accent.
+  static const themeColor = Color(0xFF0B1008);
+  static const surfaceColor = Color(0xFF151D10);
+  static const surfaceElevated = Color(0xFF1F2A17);
+  static const surfaceSoft = Color(0xFF2B3A20);
+  static const surfaceHighlight = Color(0xFF41552C);
+  static const primaryColor1 = Color(0xFFF5F9EE);
+  static const primaryColor2 = Color(0xFFB8C7A6);
+  static const accentColor1 = Color(0xFFB7F36A);
+  static const accentColor1light = Color(0xFFD6FFA1);
+  static const accentColor2 = Color(0xFFA3E635);
+  static const successColor = Color(0xFF4ADE80);
   static const warningColor = Color(0xFFFBBF24);
   static const errorColor = Color(0xFFFB7185);
 
@@ -34,53 +36,93 @@ class AppTheme {
   static const motionFast = Duration(milliseconds: 180);
   static const motionStandard = Duration(milliseconds: 260);
 
-  ThemeData get defaultThemeData {
+  ThemeData get defaultThemeData => _buildTheme(
+        brightness: Brightness.dark,
+        background: themeColor,
+        surface: surfaceColor,
+        elevatedSurface: surfaceElevated,
+        softSurface: surfaceSoft,
+        outline: surfaceHighlight,
+        text: primaryColor1,
+        secondaryText: primaryColor2,
+        primary: accentColor2,
+        secondary: accentColor1,
+        onPrimary: const Color(0xFF17220C),
+      );
+
+  ThemeData get lightThemeData => _buildTheme(
+        brightness: Brightness.light,
+        background: const Color(0xFFF7FAF2),
+        surface: const Color(0xFFFFFFFF),
+        elevatedSurface: const Color(0xFFEEF4E7),
+        softSurface: const Color(0xFFE3EBD9),
+        outline: const Color(0xFFC7D6B6),
+        text: const Color(0xFF1D2916),
+        secondaryText: const Color(0xFF58674D),
+        primary: const Color(0xFF5C8516),
+        secondary: const Color(0xFF76A72A),
+        onPrimary: const Color(0xFFFFFFFF),
+      );
+
+  ThemeData _buildTheme({
+    required Brightness brightness,
+    required Color background,
+    required Color surface,
+    required Color elevatedSurface,
+    required Color softSurface,
+    required Color outline,
+    required Color text,
+    required Color secondaryText,
+    required Color primary,
+    required Color secondary,
+    required Color onPrimary,
+  }) {
     final scheme = ColorScheme.fromSeed(
-      seedColor: accentColor2,
-      brightness: Brightness.dark,
-      surface: themeColor,
-      primary: accentColor2,
-      secondary: accentColor1,
-      tertiary: surfaceHighlight,
-      onPrimary: const Color(0xFFFFFFFF),
-      onSecondary: const Color(0xFF06212B),
-      onSurface: primaryColor1,
+      seedColor: primary,
+      brightness: brightness,
+      surface: surface,
+      primary: primary,
+      secondary: secondary,
+      tertiary: outline,
+      onPrimary: onPrimary,
+      onSecondary: text,
+      onSurface: text,
       error: errorColor,
     );
 
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: themeColor,
-      dialogBackgroundColor: surfaceElevated,
-      canvasColor: themeColor,
+      brightness: brightness,
+      scaffoldBackgroundColor: background,
+      dialogBackgroundColor: elevatedSurface,
+      canvasColor: background,
       fontFamily: 'Unageo',
       colorScheme: scheme,
-      primaryColor: accentColor2,
-      primaryColorDark: const Color(0xFF5B21B6),
+      primaryColor: primary,
+      primaryColorDark: primary,
       splashFactory: InkSparkle.splashFactory,
-      visualDensity: VisualDensity.standard,
-      iconTheme: const IconThemeData(color: primaryColor1, size: 22),
-      appBarTheme: const AppBarTheme(
+      visualDensity: VisualDensity.adaptivePlatformDensity,
+      iconTheme: IconThemeData(color: text, size: 22),
+      appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
-        foregroundColor: primaryColor1,
+        foregroundColor: text,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
         titleTextStyle: TextStyle(
-          color: primaryColor1,
+          color: text,
           fontFamily: 'Unageo',
           fontSize: 22,
           fontWeight: FontWeight.w800,
           letterSpacing: -0.4,
         ),
       ),
-      cardTheme: const CardThemeData(
-        color: surfaceColor,
+      cardTheme: CardThemeData(
+        color: surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(cornerMedium)),
         ),
       ),
@@ -91,17 +133,17 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(cornerMedium),
         ),
-        iconColor: primaryColor2,
-        textColor: primaryColor1,
+        iconColor: secondaryText,
+        textColor: text,
         subtitleTextStyle: secondoryTextStyle.copyWith(
-          color: primaryColor2,
+          color: secondaryText,
           fontSize: 12,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: accentColor2,
-          foregroundColor: const Color(0xFFFFFFFF),
+          backgroundColor: primary,
+          foregroundColor: onPrimary,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           shape: RoundedRectangleBorder(
@@ -112,8 +154,8 @@ class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: accentColor2,
-          foregroundColor: const Color(0xFFFFFFFF),
+          backgroundColor: primary,
+          foregroundColor: onPrimary,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(cornerMedium),
@@ -122,8 +164,8 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: accentColor1,
-          side: const BorderSide(color: surfaceHighlight),
+          foregroundColor: scheme.primary,
+          side: BorderSide(color: outline),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(cornerMedium),
@@ -131,36 +173,36 @@ class AppTheme {
         ),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: surfaceElevated,
-        selectedColor: accentColor2,
-        disabledColor: surfaceSoft,
+        backgroundColor: elevatedSurface,
+        selectedColor: primary,
+        disabledColor: softSurface,
         labelStyle: secondoryTextStyleMedium.copyWith(
-          color: primaryColor1,
+          color: text,
           fontSize: 12,
         ),
         secondaryLabelStyle: secondoryTextStyleMedium.copyWith(
-          color: const Color(0xFF182014),
+          color: onPrimary,
         ),
         side: BorderSide.none,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(999),
         ),
       ),
-      bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: surfaceElevated,
-        modalBackgroundColor: surfaceElevated,
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: elevatedSurface,
+        modalBackgroundColor: elevatedSurface,
         surfaceTintColor: Colors.transparent,
         showDragHandle: true,
-        dragHandleColor: surfaceHighlight,
-        shape: RoundedRectangleBorder(
+        dragHandleColor: outline,
+        shape: const RoundedRectangleBorder(
           borderRadius:
               BorderRadius.vertical(top: Radius.circular(cornerLarge)),
         ),
       ),
-      dialogTheme: const DialogThemeData(
-        backgroundColor: surfaceElevated,
+      dialogTheme: DialogThemeData(
+        backgroundColor: elevatedSurface,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(cornerLarge)),
         ),
       ),
@@ -174,30 +216,30 @@ class AppTheme {
         },
       ),
       scrollbarTheme: ScrollbarThemeData(
-        thumbColor: WidgetStatePropertyAll(accentColor2.withValues(alpha: .72)),
-        trackColor: WidgetStatePropertyAll(surfaceSoft.withValues(alpha: .35)),
+        thumbColor: WidgetStatePropertyAll(primary.withValues(alpha: .72)),
+        trackColor: WidgetStatePropertyAll(softSurface.withValues(alpha: .55)),
         interactive: true,
         radius: const Radius.circular(12),
         thickness: const WidgetStatePropertyAll(4),
       ),
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: accentColor2,
-        linearTrackColor: surfaceSoft,
-        circularTrackColor: surfaceSoft,
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: primary,
+        linearTrackColor: softSurface,
+        circularTrackColor: softSurface,
       ),
-      textSelectionTheme: const TextSelectionThemeData(
-        cursorColor: accentColor2,
-        selectionColor: Color(0x667C3AED),
-        selectionHandleColor: accentColor2,
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: primary,
+        selectionColor: primary.withValues(alpha: .28),
+        selectionHandleColor: primary,
       ),
       switchTheme: SwitchThemeData(
-        thumbColor: const WidgetStatePropertyAll(primaryColor1),
+        thumbColor: WidgetStatePropertyAll(onPrimary),
         trackColor: WidgetStateProperty.resolveWith((states) =>
-            states.contains(WidgetState.selected) ? accentColor2 : surfaceSoft),
+            states.contains(WidgetState.selected) ? primary : softSurface),
         trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
       ),
       searchBarTheme: SearchBarThemeData(
-        backgroundColor: const WidgetStatePropertyAll(surfaceElevated),
+        backgroundColor: WidgetStatePropertyAll(elevatedSurface),
         surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
         elevation: const WidgetStatePropertyAll(0),
         padding: const WidgetStatePropertyAll(
@@ -206,34 +248,31 @@ class AppTheme {
         shape: WidgetStatePropertyAll(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(cornerLarge),
-            side: const BorderSide(color: surfaceHighlight),
+            side: BorderSide(color: outline),
           ),
         ),
-        hintStyle: const WidgetStatePropertyAll(
-          TextStyle(color: primaryColor2),
-        ),
+        hintStyle: WidgetStatePropertyAll(TextStyle(color: secondaryText)),
       ),
-      popupMenuTheme: const PopupMenuThemeData(
-        color: surfaceElevated,
+      popupMenuTheme: PopupMenuThemeData(
+        color: elevatedSurface,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(cornerMedium)),
         ),
-        textStyle: TextStyle(color: primaryColor1),
+        textStyle: TextStyle(color: text, fontFamily: 'Unageo'),
       ),
-      navigationBarTheme: const NavigationBarThemeData(
-        backgroundColor: surfaceElevated,
-        indicatorColor: accentColor2,
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: elevatedSurface,
+        indicatorColor: primary,
         surfaceTintColor: Colors.transparent,
         height: 72,
-        labelTextStyle: WidgetStatePropertyAll(
-          TextStyle(fontFamily: 'Gilroy', fontWeight: FontWeight.w700),
+        labelTextStyle: const WidgetStatePropertyAll(
+          TextStyle(fontFamily: 'Unageo', fontWeight: FontWeight.w700),
         ),
       ),
     );
   }
 }
 
-// Backward-compatible alias used throughout the existing client.
-// ignore: camel_case_types
+/// Alias used by the refreshed FT-music screens.
 typedef Default_Theme = AppTheme;

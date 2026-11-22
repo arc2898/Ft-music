@@ -13,6 +13,7 @@ use crate::api::downloader::utils::{
 use crate::api::plugin::commands::{ContentResolverCommand, PluginRequest, PluginResponse};
 use crate::api::plugin::models::{Quality, StreamSource};
 use crate::api::plugin::plugin::PluginManager;
+use crate::api::plugin::types::PluginType;
 
 /// Seconds before a stream's stated expiry at which we consider it too close to
 /// use. This prevents starting a download with a URL that will expire mid-flight.
@@ -32,6 +33,14 @@ pub fn is_stream_usable(stream: &StreamSource) -> bool {
         }
     }
     true
+}
+
+/// A source is eligible for offline saving only when its installed content
+/// resolver manifest explicitly declares this capability.
+fn plugin_allows_offline_download(capabilities: &[String]) -> bool {
+    capabilities
+        .iter()
+        .any(|capability| capability.trim().eq_ignore_ascii_case("offline_download"))
 }
 
 /// Pick the best stream from `streams` given a quality preference string.
@@ -63,7 +72,45 @@ pub async fn resolve_stream(
     task: &Arc<Mutex<ManagedTask>>,
     plugin_manager: &PluginManager,
 ) -> Result<StreamSource, String> {
-    // 1. Return cached stream if it is still usable.
+    // Read the task fields under a short lock and fail early for cancellation.
+    let (track, preference) = {
+        let guard = task.lock().map_err(|_| "Task mutex poisoned".to_string())?;
+        if guard.cancel_requested.load(Ordering::Acquire) {
+            return Err("Task was cancelled during stream resolution".to_string());
+        }
+        (
+            guard.persisted.track.clone(),
+            guard.persisted.preferred_quality.clone(),
+        )
+    };
+
+    // Verify source authorization BEFORE consulting a cached stream. Tasks can
+    // survive restarts or be resumed after a plugin update removes permission.
+    let (plugin_id, local_id) = split_media_id(&track.id).ok_or_else(|| {
+        format!(
+            "Offline saving for '{}' requires a content resolver that declares the 'offline_download' capability.",
+            track.title
+        )
+    })?;
+
+    let plugin_info = plugin_manager
+        .get_available_plugins()
+        .await
+        .into_iter()
+        .find(|plugin| {
+            plugin.id() == plugin_id.as_str()
+                && plugin.plugin_type == PluginType::ContentResolver
+        })
+        .ok_or_else(|| format!("Content resolver '{plugin_id}' is not installed"))?;
+
+    if !plugin_allows_offline_download(&plugin_info.manifest.capabilities) {
+        return Err(format!(
+            "Content resolver '{plugin_id}' has not explicitly authorized offline downloads. Its manifest must declare the 'offline_download' capability."
+        ));
+    }
+
+    // A cached URL is reusable only after the current plugin manifest has
+    // passed the authorization check above.
     {
         let guard = task.lock().map_err(|_| "Task mutex poisoned".to_string())?;
         if guard.cancel_requested.load(Ordering::Acquire) {
@@ -76,50 +123,27 @@ pub async fn resolve_stream(
         }
     }
 
-    // 2. Need a fresh stream – read the fields we need under a short lock.
-    let (track, preference) = {
-        let guard = task.lock().map_err(|_| "Task mutex poisoned".to_string())?;
-        (guard.persisted.track.clone(), guard.persisted.preferred_quality.clone())
+    // Resolve a fresh stream only after authorization is confirmed.
+    let response = plugin_manager
+        .handle_plugin_request(
+            &plugin_id,
+            PluginRequest::ContentResolver(ContentResolverCommand::GetStreams {
+                id: local_id,
+            }),
+        )
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let streams = match response {
+        PluginResponse::Streams(s) => s,
+        _ => return Err("Unexpected plugin response for GetStreams".to_string()),
     };
 
-    // 3. Fetch from plugin manager (this is async and may take time).
-    let stream = if let Some((plugin_id, local_id)) = split_media_id(&track.id) {
-        let response = plugin_manager
-            .handle_plugin_request(
-                &plugin_id,
-                PluginRequest::ContentResolver(ContentResolverCommand::GetStreams {
-                    id: local_id,
-                }),
-            )
-            .await
-            .map_err(|e| e.to_string())?;
+    let stream = select_best_stream(&streams, &preference)
+        .ok_or_else(|| format!("No usable streams returned for '{}'", track.title))?;
 
-        let streams = match response {
-            PluginResponse::Streams(s) => s,
-            _ => return Err("Unexpected plugin response for GetStreams".to_string()),
-        };
-
-        select_best_stream(&streams, &preference)
-            .ok_or_else(|| format!("No usable streams returned for '{}'", track.title))?
-    } else if let Some(url) = track.url.clone() {
-        // Direct URL track (not a plugin-managed ID).
-        if url.starts_with("http://") || url.starts_with("https://") {
-            StreamSource {
-                url: url.clone(),
-                quality: Quality::High,
-                format: guess_extension_from_url(None, &url),
-                headers: None,
-                expires_at: None,
-            }
-        } else {
-            return Err(format!("Invalid direct URL for '{}'", track.title));
-        }
-    } else {
-        return Err(format!("No stream source available for '{}'", track.title));
-    };
-
-    // 4. Check for cancellation again before mutating the task (avoids a race
-    //    where the user cancelled while the plugin call was in flight).
+    // Check for cancellation again before mutating the task (avoids a race
+    // where the user cancelled while the plugin call was in flight).
     {
         let guard = task.lock().map_err(|_| "Task mutex poisoned".to_string())?;
         if guard.cancel_requested.load(Ordering::Acquire) {
@@ -127,7 +151,7 @@ pub async fn resolve_stream(
         }
     }
 
-    // 5. Persist the resolved stream and derive file name / target path if not set.
+    // Persist the resolved stream and derive file name / target path if not set.
     {
         let mut guard = task.lock().map_err(|_| "Task mutex poisoned".to_string())?;
         guard.persisted.selected_stream = Some(stream.clone());
@@ -150,3 +174,25 @@ pub async fn resolve_stream(
     Ok(stream)
 }
 
+
+#[cfg(test)]
+mod offline_download_policy_tests {
+    use super::plugin_allows_offline_download;
+
+    #[test]
+    fn requires_explicit_offline_download_capability() {
+        assert!(plugin_allows_offline_download(&[
+            "charts".to_string(),
+            "offline_download".to_string(),
+        ]));
+        assert!(!plugin_allows_offline_download(&["streaming".to_string()]));
+        assert!(!plugin_allows_offline_download(&[]));
+    }
+
+    #[test]
+    fn capability_matching_is_trimmed_and_case_insensitive() {
+        assert!(plugin_allows_offline_download(&[
+            " Offline_Download ".to_string(),
+        ]));
+    }
+}

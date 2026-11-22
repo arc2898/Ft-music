@@ -4,6 +4,9 @@ import 'dart:io';
 
 import 'package:ft_music/blocs/library/cubit/library_items_cubit.dart';
 import 'package:ft_music/services/plugin/plugin_service.dart';
+import 'package:ft_music/plugins/utils/media_id.dart';
+import 'package:ft_music/services/download/offline_download_policy.dart';
+import 'package:ft_music/src/rust/api/plugin/types.dart';
 import 'package:ft_music/services/download/rust_download_service.dart';
 import 'package:ft_music/src/rust/api/downloader/types.dart';
 import 'package:ft_music/utils/download_types.dart';
@@ -103,15 +106,30 @@ class DownloaderCubit extends Cubit<DownloaderState> {
 
   Future<Directory> _getDownloadDirectory() async {
     if (Platform.isAndroid || Platform.isIOS) {
-      final directory = (await getDownloadsDirectory()) ??
-          await getApplicationDocumentsDirectory();
-      return directory;
+      // App-scoped storage avoids requesting broad media/storage permissions.
+      final supportDirectory = await getApplicationSupportDirectory();
+      return Directory(path.join(supportDirectory.path, 'offline_music'));
     }
-    final p = await _settingsDao.getSettingStr(SettingKeys.downPathSetting);
-    if (p != null) {
-      return Directory(p);
+    final configuredPath =
+        await _settingsDao.getSettingStr(SettingKeys.downPathSetting);
+    if (configuredPath != null && configuredPath.trim().isNotEmpty) {
+      return Directory(configuredPath);
     }
-    return await getApplicationDocumentsDirectory();
+    return getApplicationDocumentsDirectory();
+  }
+
+  Future<Directory> _prepareDownloadDirectory() async {
+    final directory = await _getDownloadDirectory();
+    await directory.create(recursive: true);
+
+    // Fail before enqueueing if the chosen directory cannot actually be written.
+    final probe = File(path.join(
+      directory.path,
+      '.ft_music_storage_check_${DateTime.now().microsecondsSinceEpoch}',
+    ));
+    await probe.writeAsString('ok', flush: true);
+    await probe.delete();
+    return directory;
   }
 
   void _setupLibrarySubscription() {
@@ -380,6 +398,30 @@ class DownloaderCubit extends Cubit<DownloaderState> {
     return false;
   }
 
+  Future<bool> _isOfflineDownloadAuthorized(Track song) async {
+    final parts = tryParseMediaId(song.id);
+    if (parts == null || parts.pluginId == kLocalPluginId) return false;
+
+    try {
+      final info = await _pluginService.getPluginInfo(
+        pluginId: parts.pluginId,
+        pluginType: PluginType.contentResolver,
+      );
+      return OfflineDownloadPolicy.allows(
+        mediaId: song.id,
+        capabilities: info?.manifest.capabilities ?? const <String>[],
+      );
+    } catch (error, stackTrace) {
+      log(
+        'Could not verify offline-download permission for ${song.id}',
+        name: 'DownloaderCubit',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return false;
+    }
+  }
+
   /// The main public method to initiate a new download.
   Future<void> downloadSong(Track song, {bool showSnackbar = true}) async {
     try {
@@ -393,6 +435,15 @@ class DownloaderCubit extends Cubit<DownloaderState> {
       );
       if (showSnackbar) {
         SnackbarService.showMessage('Error: Download service is unavailable.');
+      }
+      return;
+    }
+
+    if (!await _isOfflineDownloadAuthorized(song)) {
+      if (showSnackbar) {
+        SnackbarService.showMessage(
+          'This source has not explicitly authorized offline saving.',
+        );
       }
       return;
     }
@@ -424,7 +475,23 @@ class DownloaderCubit extends Cubit<DownloaderState> {
       return;
     }
 
-    final directory = await _getDownloadDirectory();
+    final Directory directory;
+    try {
+      directory = await _prepareDownloadDirectory();
+    } catch (error, stackTrace) {
+      log(
+        'Offline storage is not writable',
+        name: 'DownloaderCubit',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      if (showSnackbar) {
+        SnackbarService.showMessage(
+          'Cannot access offline storage. Check the selected folder permissions.',
+        );
+      }
+      return;
+    }
 
     if (showSnackbar) {
       SnackbarService.showMessage("Preparing download for ${song.title}...");

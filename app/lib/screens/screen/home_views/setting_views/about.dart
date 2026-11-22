@@ -7,30 +7,30 @@ import 'dart:math';
 
 // Color palette
 // Darken background slightly for higher contrast against foreground elements
-const Color kBackgroundColor = Color(0xFF0B0710);
+const Color kBackgroundColor = Color(0xFF0B1008);
 const Color kPrimaryTextColor = Colors.white;
-const Color kSecondaryTextColor = Color(0xFFC3B9CF);
+const Color kSecondaryTextColor = Color(0xFFB8C7A6);
 // Make the frosted card a bit less translucent so it reads clearer on darkbg
-const Color kCardBackgroundColor = Color.fromRGBO(40, 32, 50, 0.18);
+const Color kCardBackgroundColor = Color.fromRGBO(31, 42, 23, 0.78);
 
 // Gradients
 const Gradient kTitleGradient = LinearGradient(
-  colors: [Color(0xFFFEBD88), Color(0xFFF17C98)],
+  colors: [Color(0xFFD6FFA1), Color(0xFFA3E635)],
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
 );
 const Gradient kButtonGradient = LinearGradient(
-  colors: [Color(0xFFFFB88C), Color(0xFFDE6262)],
+  colors: [Color(0xFFB7F36A), Color(0xFF5C8516)],
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
 );
 const Gradient kHandleGradient = LinearGradient(
-  colors: [Color(0xFFFFB88C), Color(0xFFF88A6B)],
+  colors: [Color(0xFFD6FFA1), Color(0xFFA3E635)],
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
 );
 const Gradient kWaveformGradient = LinearGradient(
-  colors: [Color(0xFFE3729A), Color(0xFFF88A6B)],
+  colors: [Color(0xFFB7F36A), Color(0xFF76A72A)],
   begin: Alignment.centerLeft,
   end: Alignment.centerRight,
 );
@@ -129,7 +129,7 @@ class About extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
-                            fontFamily: 'Gilroy',
+                            fontFamily: 'Unageo',
                           ),
                         ),
                         ClipRRect(
@@ -151,7 +151,7 @@ class About extends StatelessWidget {
                 style: const TextStyle(
                     fontSize: 16,
                     color: kSecondaryTextColor,
-                    fontFamily: 'Gilroy'),
+                    fontFamily: 'Unageo'),
               ),
               const SizedBox(height: 35),
               Container(
@@ -188,7 +188,7 @@ class About extends StatelessWidget {
                           color: kPrimaryTextColor,
                           fontWeight: FontWeight.w500,
                           fontSize: 16,
-                          fontFamily: 'Gilroy',
+                          fontFamily: 'Unageo',
                           shadows: [
                             Shadow(
                               color: const Color.fromARGB(255, 255, 246, 238)
@@ -261,7 +261,7 @@ class About extends StatelessWidget {
             l10n.aboutTipQuote,
             textAlign: TextAlign.center,
             style: const TextStyle(
-                color: kSecondaryTextColor, fontSize: 14, fontFamily: 'Gilroy'),
+                color: kSecondaryTextColor, fontSize: 14, fontFamily: 'Unageo'),
           ),
         ),
         const SizedBox(height: 12),
@@ -311,7 +311,7 @@ class About extends StatelessWidget {
                         color: kPrimaryTextColor,
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        fontFamily: 'Gilroy',
+                        fontFamily: 'Unageo',
                       ),
                     ),
                   ],
@@ -325,7 +325,7 @@ class About extends StatelessWidget {
           l10n.aboutTipDesc,
           textAlign: TextAlign.center,
           style: const TextStyle(
-              color: kSecondaryTextColor, fontSize: 14, fontFamily: 'Gilroy'),
+              color: kSecondaryTextColor, fontSize: 14, fontFamily: 'Unageo'),
         ),
       ],
     );
@@ -354,7 +354,7 @@ class About extends StatelessWidget {
                       style: const TextStyle(
                           color: kSecondaryTextColor,
                           fontSize: 12,
-                          fontFamily: 'Gilroy')),
+                          fontFamily: 'Unageo')),
                 ],
               ),
             ),
@@ -369,7 +369,7 @@ class About extends StatelessWidget {
                     style: const TextStyle(
                         color: kSecondaryTextColor,
                         fontSize: 12,
-                        fontFamily: 'Gilroy'));
+                        fontFamily: 'Unageo'));
               },
             ),
           ],
@@ -397,7 +397,7 @@ class _InfoPill extends StatelessWidget {
             style: const TextStyle(
                 color: kSecondaryTextColor,
                 fontSize: 13,
-                fontFamily: 'Gilroy')),
+                fontFamily: 'Unageo')),
       ],
     );
 

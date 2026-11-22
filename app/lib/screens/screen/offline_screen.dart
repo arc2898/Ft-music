@@ -10,7 +10,6 @@ import 'package:ft_music/screens/widgets/sign_board_widget.dart';
 import 'package:ft_music/screens/widgets/snackbar.dart';
 import 'package:ft_music/screens/widgets/song_tile.dart';
 import 'package:flutter/material.dart';
-import 'package:ft_music/core/theme/app_theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ft_music/l10n/app_localizations.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -71,7 +70,7 @@ class _OfflineScreenState extends State<OfflineScreen> {
     final l10n = AppLocalizations.of(context)!;
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Default_Theme.themeColor,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: BlocBuilder<DownloaderCubit, DownloaderState>(
           builder: (context, state) {
             if (_searchController.text.isEmpty) {
@@ -160,8 +159,8 @@ class _OfflineScreenState extends State<OfflineScreen> {
     return SliverAppBar(
       floating: true,
       pinned: true,
-      surfaceTintColor: Default_Theme.themeColor,
-      backgroundColor: Default_Theme.themeColor,
+      surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       title: AnimatedSwitcher(
         duration: const Duration(milliseconds: 350),
         transitionBuilder: (Widget child, Animation<double> animation) {
@@ -180,7 +179,7 @@ class _OfflineScreenState extends State<OfflineScreen> {
             ),
           );
         },
-        child: _isSearch ? _buildSearchField(l10n) : _buildTitle(l10n),
+        child: _isSearch ? _buildSearchField(context, l10n) : _buildTitle(context, l10n),
       ),
       actions: [
         !_isSearch
@@ -200,7 +199,7 @@ class _OfflineScreenState extends State<OfflineScreen> {
           child: IconButton(
             icon: Icon(
               _isSearch ? Icons.close : Icons.search,
-              color: Default_Theme.primaryColor1,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
             onPressed: _toggleSearch,
           ),
@@ -209,39 +208,41 @@ class _OfflineScreenState extends State<OfflineScreen> {
     );
   }
 
-  Widget _buildTitle(AppLocalizations l10n) {
+  Widget _buildTitle(BuildContext context, AppLocalizations l10n) {
     return Container(
       key: const ValueKey('title'),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(l10n.offlineTitle,
-              style: Default_Theme.primaryTextStyle.merge(const TextStyle(
-                  fontSize: 34, color: Default_Theme.primaryColor1))),
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -.4,
+              )),
           const Spacer(),
         ],
       ),
     );
   }
 
-  Widget _buildSearchField(AppLocalizations l10n) {
+  Widget _buildSearchField(BuildContext context, AppLocalizations l10n) {
     return Container(
       key: const ValueKey('search'),
       child: TextField(
         controller: _searchController,
         autofocus: true,
-        cursorColor: Default_Theme.primaryColor1,
+        cursorColor: Theme.of(context).colorScheme.primary,
         decoration: InputDecoration(
           hintText: l10n.offlineSearchHint,
           border: InputBorder.none,
-          hintStyle: TextStyle(
-              color: Default_Theme.primaryColor1.withValues(alpha: 0.7)),
-        ),
-        style: Default_Theme.secondoryTextStyle.merge(
-          const TextStyle(
-            color: Default_Theme.primaryColor1,
-            fontSize: 15.0,
+          hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
+        ),
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: Theme.of(context).colorScheme.onSurface,
+          fontSize: 15,
         ),
       ),
     );

@@ -1,6 +1,5 @@
 import 'package:ft_music/screens/widgets/sign_board_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:ft_music/core/theme/app_theme.dart';
 import 'package:icons_plus/icons_plus.dart';
 
 class DownloadsView extends StatelessWidget {
@@ -9,15 +8,15 @@ class DownloadsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         centerTitle: true,
         title: Text(
           'Downloads',
-          style: const TextStyle(
-                  color: Default_Theme.primaryColor1,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold)
-              .merge(Default_Theme.secondoryTextStyle),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: const Center(
