@@ -107,7 +107,7 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  adaptive_icon_background: "#0B1008"
+  adaptive_icon_background: "#070C06"
   adaptive_icon_foreground: "assets/icons/ft_music_mark.png"
   image_path: "assets/icons/ft_music_mark.png"
   min_sdk_android: 21 # android min sdk min:16, default 21
