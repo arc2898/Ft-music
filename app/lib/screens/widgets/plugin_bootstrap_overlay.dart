@@ -235,11 +235,14 @@ class _SpinnerBody extends StatelessWidget {
                             color: Default_Theme.accentColor2,
                             size: 36,
                           )
-                        : Image.asset(
-                            'assets/icons/ft_music_mark.png',
-                            fit: BoxFit.contain,
-                            semanticLabel: 'FT-music',
-                          ),
+                        : ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Image.asset(
+                          'assets/icons/ft_music_mark.png',
+                          fit: BoxFit.contain,
+                          semanticLabel: 'FT-music',
+                        ),
+                      ),
                   ),
                 ],
               ),
