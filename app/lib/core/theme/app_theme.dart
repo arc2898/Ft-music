@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 /// FT-music design tokens. Screens should prefer Theme.of(context) so both
 /// palettes respond to the persisted appearance setting.
-// ignore: camel_case_types
-class Default_Theme {
+/// Keep the original public class name for existing widgets and extensions.
+class AppTheme {
   static const primaryTextStyle = TextStyle(fontFamily: 'Unageo');
   static const secondoryTextStyle = TextStyle(fontFamily: 'Unageo');
   static const secondoryTextStyleMedium =
@@ -274,3 +274,5 @@ class Default_Theme {
   }
 }
 
+/// Alias used by the refreshed FT-music screens.
+typedef Default_Theme = AppTheme;
