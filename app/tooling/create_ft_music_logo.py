@@ -50,10 +50,10 @@ if contents.is_file():
         filename = item.get("filename")
         if not filename:
             continue
-        match = re.match(r"Icon-App-(\d+(?:\.5)?)[xX]\d+(?:@([123])x)?\.png$", filename)
+        match = re.match(r"Icon-App-(\d+(?:\.5)?)[xX](\d+(?:\.5)?)(?:@([123])x)?\.png$", filename)
         if match:
             logical = float(match.group(1))
-            scale = int(match.group(2) or 1)
+            scale = int(match.group(3) or 1)
             save_square(ios_set / filename, round(logical * scale))
 
 # macOS icon set.
