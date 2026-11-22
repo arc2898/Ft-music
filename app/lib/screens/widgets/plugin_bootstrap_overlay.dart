@@ -34,7 +34,7 @@ class _PluginBootstrapOverlayState extends State<PluginBootstrapOverlay>
   static const _bgBase = Color(0xFF060608);
   static const _surfaceCol = Color(0xFF14141A);
   static const _errorAccent = Color(0xFFFF4C4C);
-  static const _successAccent = Color(0xFFA8F018);
+  static const _successAccent = Color(0xFFA3E635);
 
   final ValueNotifier<_Phase> _phase = ValueNotifier(_Phase.running);
   final ValueNotifier<int> _progress = ValueNotifier(0);
@@ -236,13 +236,13 @@ class _SpinnerBody extends StatelessWidget {
                             size: 36,
                           )
                         : ClipRRect(
-                        borderRadius: BorderRadius.circular(14),
-                        child: Image.asset(
-                          'assets/icons/ft_music_mark.png',
-                          fit: BoxFit.contain,
-                          semanticLabel: 'FT-music',
-                        ),
-                      ),
+                            borderRadius: BorderRadius.circular(14),
+                            child: Image.asset(
+                              'assets/icons/ft_music_mark.png',
+                              fit: BoxFit.contain,
+                              semanticLabel: 'FT-music',
+                            ),
+                          ),
                   ),
                 ],
               ),
