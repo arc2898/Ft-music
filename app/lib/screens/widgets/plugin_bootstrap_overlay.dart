@@ -34,7 +34,7 @@ class _PluginBootstrapOverlayState extends State<PluginBootstrapOverlay>
   static const _bgBase = Color(0xFF060608);
   static const _surfaceCol = Color(0xFF14141A);
   static const _errorAccent = Color(0xFFFF4C4C);
-  static const _successAccent = Color(0xFFFF2A5F);
+  static const _successAccent = Color(0xFFA8F018);
 
   final ValueNotifier<_Phase> _phase = ValueNotifier(_Phase.running);
   final ValueNotifier<int> _progress = ValueNotifier(0);
@@ -191,32 +191,51 @@ class _SpinnerBody extends StatelessWidget {
               opacity: isDone ? 1.0 : pulse.value,
               child: child,
             ),
-            child: Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Default_Theme.accentColor2.withValues(alpha: 0.12),
-                border: Border.all(
-                  color: Default_Theme.accentColor2.withValues(alpha: 0.4),
-                  width: 1.5,
-                ),
-              ),
-              child: Center(
-                child: isDone
-                    ? const Icon(
-                        Icons.check_rounded,
+            child: SizedBox(
+              width: 104,
+              height: 104,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  ValueListenableBuilder<int>(
+                    valueListenable: progress,
+                    builder: (context, percent, _) => SizedBox(
+                      width: 104,
+                      height: 104,
+                      child: CircularProgressIndicator(
+                        value: isDone ? 1 : percent / 100,
+                        strokeWidth: 3,
+                        strokeCap: StrokeCap.round,
+                        backgroundColor:
+                            Default_Theme.accentColor2.withValues(alpha: .14),
                         color: Default_Theme.accentColor2,
-                        size: 36,
-                      )
-                    : const SizedBox(
-                        width: 36,
-                        height: 36,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Default_Theme.accentColor2,
-                        ),
                       ),
+                    ),
+                  ),
+                  Container(
+                    width: 84,
+                    height: 84,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color(0xFF101707),
+                      border: Border.all(
+                        color: Default_Theme.accentColor2.withValues(alpha: .2),
+                      ),
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    child: isDone
+                        ? const Icon(
+                            Icons.check_rounded,
+                            color: Default_Theme.accentColor2,
+                            size: 36,
+                          )
+                        : Image.asset(
+                            'assets/icons/ft_music_mark.png',
+                            fit: BoxFit.contain,
+                            semanticLabel: 'FT-music',
+                          ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -225,9 +244,11 @@ class _SpinnerBody extends StatelessWidget {
             l10n?.pluginBootstrapTitle ?? 'Setting up FT-music',
             textAlign: TextAlign.center,
             style: const TextStyle(
+              fontFamily: 'Unageo',
+              decoration: TextDecoration.none,
               color: Colors.white,
               fontSize: 22,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w800,
               letterSpacing: -0.3,
             ),
           ),
@@ -235,17 +256,33 @@ class _SpinnerBody extends StatelessWidget {
           ValueListenableBuilder<int>(
             valueListenable: progress,
             builder: (context, percent, _) => AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 220),
               child: Text(
                 l10n?.pluginBootstrapProgress(percent) ??
-                    'Setting up new plugin engine... $percent%',
+                    'Preparing plugin engine · $percent%',
                 key: ValueKey(percent),
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.55),
+                  fontFamily: 'Unageo',
+                  decoration: TextDecoration.none,
+                  color: Colors.white.withValues(alpha: 0.76),
                   fontSize: 14,
+                  fontWeight: FontWeight.w600,
                   height: 1.5,
                 ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          ValueListenableBuilder<int>(
+            valueListenable: progress,
+            builder: (context, percent, _) => ClipRRect(
+              borderRadius: BorderRadius.circular(99),
+              child: LinearProgressIndicator(
+                value: percent / 100,
+                minHeight: 5,
+                backgroundColor: Colors.white.withValues(alpha: .10),
+                color: Default_Theme.accentColor2,
               ),
             ),
           ),
@@ -254,7 +291,9 @@ class _SpinnerBody extends StatelessWidget {
             l10n?.pluginBootstrapHint ?? 'This only happens once.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.35),
+              fontFamily: 'Unageo',
+              decoration: TextDecoration.none,
+              color: Colors.white.withValues(alpha: 0.48),
               fontSize: 12,
             ),
           ),
@@ -321,7 +360,7 @@ class _ErrorBody extends StatelessWidget {
                 onPressed: onRetry,
                 style: FilledButton.styleFrom(
                   backgroundColor: _PluginBootstrapOverlayState._successAccent,
-                  foregroundColor: Colors.white,
+                  foregroundColor: const Color(0xFF101707),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -427,7 +466,7 @@ class _NoInternetBody extends StatelessWidget {
                     style: FilledButton.styleFrom(
                       backgroundColor:
                           _PluginBootstrapOverlayState._successAccent,
-                      foregroundColor: Colors.white,
+                      foregroundColor: const Color(0xFF101707),
                       padding: const EdgeInsets.symmetric(vertical: 13),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
