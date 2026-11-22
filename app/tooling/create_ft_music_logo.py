@@ -1,41 +1,21 @@
+#!/usr/bin/env python3
+"""Regenerate legacy Android launcher bitmaps from the canonical FT-music icon.
+
+The canonical artwork is assets/icons/ft_music_mark.png. Do not draw a second
+logo here: Flutter Launcher Icons reads the same source from pubspec.yaml for
+Android adaptive icons, iOS, macOS and Windows.
+"""
 from pathlib import Path
-from PIL import Image, ImageDraw
+from PIL import Image
 
-SIZE = 1024
-BACKGROUND = (11, 16, 8, 255)
-TILE = (15, 23, 10, 255)
-LIME = (190, 242, 66, 255)
-LIME_DARK = (151, 210, 44, 255)
-RING = (72, 105, 27, 255)
+ROOT = Path(__file__).resolve().parents[1]
+SOURCE = ROOT / "assets" / "icons" / "ft_music_mark.png"
+RES = ROOT / "android" / "app" / "src" / "main" / "res"
 
-image = Image.new("RGBA", (SIZE, SIZE), BACKGROUND)
-draw = ImageDraw.Draw(image)
+if not SOURCE.is_file():
+    raise SystemExit(f"Missing canonical FT-music icon: {SOURCE}")
 
-# Rounded tile, inner keyline, and quiet circular sound-wave ring.
-draw.rounded_rectangle((18, 18, SIZE - 18, SIZE - 18), radius=224, fill=TILE,
-                       outline=(54, 74, 28, 255), width=10)
-draw.ellipse((180, 180, 844, 844), outline=RING, width=16)
-
-# A compact F monogram with a vertical stem and two broad bars.
-draw.rounded_rectangle((296, 264, 408, 760), radius=56, fill=LIME)
-draw.rounded_rectangle((356, 264, 736, 376), radius=56, fill=LIME)
-draw.rounded_rectangle((356, 456, 656, 568), radius=56, fill=LIME)
-
-# Three sound-wave beats complete the mark without adding fine detail.
-draw.rounded_rectangle((692, 584, 768, 660), radius=34, fill=LIME_DARK)
-draw.rounded_rectangle((664, 680, 768, 756), radius=34, fill=LIME)
-draw.rounded_rectangle((600, 776, 768, 852), radius=34, fill=LIME_DARK)
-draw.ellipse((724, 192, 800, 268), fill=LIME)
-
-assets = Path("assets/icons")
-assets.mkdir(parents=True, exist_ok=True)
-image.save(assets / "ft_music_mark.png", optimize=True)
-image.resize((512, 512), Image.Resampling.LANCZOS).save(
-    assets / "ft_music_lighter.png", optimize=True
-)
-
-# Regenerate the legacy Android launcher bitmap sizes from the same source.
-res = Path("android/app/src/main/res")
+icon = Image.open(SOURCE).convert("RGBA")
 for density, size in {
     "mdpi": 48,
     "hdpi": 72,
@@ -43,8 +23,11 @@ for density, size in {
     "xxhdpi": 144,
     "xxxhdpi": 192,
 }.items():
-    resized = image.resize((size, size), Image.Resampling.LANCZOS)
-    target = res / f"mipmap-{density}"
+    target = RES / f"mipmap-{density}"
     target.mkdir(parents=True, exist_ok=True)
+    resized = icon.resize((size, size), Image.Resampling.LANCZOS)
     resized.save(target / "ic_launcher.png", optimize=True)
     resized.save(target / "launcher_icon.png", optimize=True)
+
+print("Regenerated legacy Android launcher icons from ft_music_mark.png")
+print("For all platform icon sets, run: dart run flutter_launcher_icons")
