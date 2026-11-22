@@ -572,7 +572,7 @@ class _FTMusicBrand extends StatelessWidget {
         Text(
           'FT-music',
           style: Default_Theme.secondoryTextStyleMedium.merge(
-            const TextStyle(
+            TextStyle(
               fontSize: 25,
               letterSpacing: -0.6,
               color: Theme.of(context).colorScheme.onSurface,
@@ -598,7 +598,7 @@ class TimerIcon extends StatelessWidget {
           MaterialPageRoute(builder: (context) => const TimerView()),
         );
       },
-      icon: const Icon(
+      icon: Icon(
         Icons.timer_outlined,
         color: Theme.of(context).colorScheme.onSurface,
         size: 30.0,
@@ -621,7 +621,7 @@ class SettingsIcon extends StatelessWidget {
           MaterialPageRoute(builder: (context) => const SettingsView()),
         );
       },
-      icon: const Icon(
+      icon: Icon(
         Icons.settings_rounded,
         color: Theme.of(context).colorScheme.onSurface,
         size: 30.0,
