@@ -132,7 +132,12 @@ class _PluginBootstrapOverlayState extends State<PluginBootstrapOverlay>
         child: Container(
           color: _bgBase,
           child: Center(
-            child: ConstrainedBox(
+            child: DefaultTextStyle.merge(
+              style: const TextStyle(
+                fontFamily: 'Unageo',
+                decoration: TextDecoration.none,
+              ),
+              child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: _maxContentWidth),
               child: ValueListenableBuilder<_Phase>(
                 valueListenable: _phase,
@@ -157,6 +162,7 @@ class _PluginBootstrapOverlayState extends State<PluginBootstrapOverlay>
                   );
                 },
               ),
+            ),
             ),
           ),
         ),
