@@ -189,7 +189,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           child: BlocBuilder<RecentlyCubit, RecentlyCubitState>(
                             builder: (context, state) {
                               if (state is RecentlyCubitInitial) {
-                                return const Center(
+                                return Center(
                                   child: SizedBox(
                                     height: 60,
                                     width: 60,
@@ -353,7 +353,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                   );
                                 }
 
-                                return const Padding(
+                                return Padding(
                                   padding: EdgeInsets.symmetric(vertical: 40),
                                   child: Center(
                                     child: CircularProgressIndicator(
