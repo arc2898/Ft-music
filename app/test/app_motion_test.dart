@@ -31,14 +31,17 @@ void main() {
             child: Builder(
               builder: (context) {
                 duration = AppMotion.resolve(context, AppMotion.standard);
-                return const SizedBox.shrink();
+                return const SizedBox(key: ValueKey('motion-target'));
               },
             ),
           ),
         ),
       );
 
-      expect(AppMotion.reduceMotion(tester.element(find.byType(SizedBox))), isTrue);
+      expect(
+        AppMotion.reduceMotion(tester.element(find.byKey(const ValueKey('motion-target')))),
+        isTrue,
+      );
       expect(duration, Duration.zero);
     });
   });
