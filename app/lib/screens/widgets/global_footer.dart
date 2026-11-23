@@ -1,5 +1,6 @@
 import 'package:ft_music/blocs/player_overlay/player_overlay_cubit.dart';
 import 'package:ft_music/screens/widgets/player_overlay_wrapper.dart';
+import 'package:ft_music/core/theme/app_motion.dart';
 import 'package:ft_music/screens/widgets/mini_player_widget.dart';
 import 'package:ft_music/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -317,7 +318,7 @@ class _BottomNavItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         onTap: onTap,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
+          duration: AppMotion.resolve(context, AppMotion.quick),
           curve: Curves.easeOutCubic,
           margin: const EdgeInsets.symmetric(horizontal: 2),
           decoration: BoxDecoration(
