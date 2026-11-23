@@ -11,6 +11,7 @@ import 'package:ft_music/blocs/downloader/cubit/downloader_cubit.dart';
 import 'package:ft_music/blocs/media_player/bloomee_player_cubit.dart';
 import 'package:ft_music/core/models/exported.dart' hide MediaItem;
 import 'package:ft_music/core/theme/app_theme.dart';
+import 'package:ft_music/core/theme/app_motion.dart';
 import 'package:ft_music/screens/widgets/media_metadata_links.dart';
 import 'package:ft_music/utils/load_image.dart';
 
@@ -61,13 +62,13 @@ class SongCardWidget extends StatelessWidget {
         final l10n = AppLocalizations.of(context)!;
 
         return AnimatedContainer(
-          duration: const Duration(milliseconds: 350),
+          duration: AppMotion.resolve(context, AppMotion.standard),
           curve: Curves.easeOutCubic,
           height: 66,
           margin: const EdgeInsets.symmetric(vertical: 2),
           decoration: BoxDecoration(
             color: isPlaying
-                ? Default_Theme.accentColor2.withValues(alpha: 0.08)
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.08)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(14),
           ),
@@ -75,9 +76,9 @@ class SongCardWidget extends StatelessWidget {
             color: Colors.transparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(14),
-              splashColor: Default_Theme.primaryColor1.withValues(alpha: 0.06),
+              splashColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.06),
               highlightColor:
-                  Default_Theme.primaryColor1.withValues(alpha: 0.03),
+                  Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.03),
               onTap: onTap,
               onLongPress: onOptionsTap,
               onSecondaryTap: onOptionsTap,
@@ -90,7 +91,7 @@ class SongCardWidget extends StatelessWidget {
                         width: 36,
                         child: Center(
                           child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 300),
+                            duration: AppMotion.resolve(context, AppMotion.standard),
                             switchInCurve: Curves.easeOutBack,
                             switchOutCurve: Curves.easeIn,
                             transitionBuilder: (child, animation) =>
@@ -100,17 +101,17 @@ class SongCardWidget extends StatelessWidget {
                                   scale: animation, child: child),
                             ),
                             child: isPlaying
-                                ? const Icon(
+                                ? Icon(
                                     Icons.graphic_eq_rounded,
                                     key: ValueKey('playing_icon'),
-                                    color: Default_Theme.accentColor2,
+                                    color: Theme.of(context).colorScheme.primary,
                                     size: 18,
                                   )
                                 : Text(
                                     index.toString(),
                                     key: const ValueKey('index_text'),
                                     style: TextStyle(
-                                      color: Default_Theme.primaryColor2
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant
                                           .withValues(alpha: 0.5),
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
@@ -143,12 +144,12 @@ class SongCardWidget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           AnimatedDefaultTextStyle(
-                            duration: const Duration(milliseconds: 300),
+                            duration: AppMotion.resolve(context, AppMotion.standard),
                             curve: Curves.easeOutCubic,
                             style: TextStyle(
                               color: isPlaying
-                                  ? Default_Theme.accentColor2
-                                  : Colors.white.withValues(alpha: 0.75),
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75),
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
                               letterSpacing: -0.2,
@@ -166,7 +167,7 @@ class SongCardWidget extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                color: Default_Theme.primaryColor2
+                                color: Theme.of(context).colorScheme.onSurfaceVariant
                                     .withValues(alpha: 0.65),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w400,
@@ -176,7 +177,7 @@ class SongCardWidget extends StatelessWidget {
                             TrackMetadataLinks(
                               track: song,
                               style: TextStyle(
-                                color: Default_Theme.primaryColor2
+                                color: Theme.of(context).colorScheme.onSurfaceVariant
                                     .withValues(alpha: 0.65),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w400,
@@ -295,15 +296,15 @@ class _ActionButton extends StatelessWidget {
       clipBehavior: Clip.hardEdge,
       child: InkWell(
         onTap: onTap,
-        splashColor: Default_Theme.primaryColor1.withValues(alpha: 0.1),
-        highlightColor: Default_Theme.primaryColor1.withValues(alpha: 0.05),
+        splashColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+        highlightColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Icon(
             icon,
             size: iconSize,
             color: iconColor ??
-                Default_Theme.primaryColor1.withValues(alpha: 0.65),
+                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
           ),
         ),
       ),
