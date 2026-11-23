@@ -151,13 +151,13 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
 
   List<Widget> _buildBody(BuildContext context, LocalMusicState state) {
     if (state is LocalMusicLoading || state is LocalMusicInitial) {
-      return [_buildLoadingSliver()];
+      return [_buildLoadingSliver(context)];
     }
     if (state is LocalMusicNoPermission) {
       return [_buildNoPermissionSliver(context)];
     }
     if (state is LocalMusicScanning) {
-      return [_buildScanningSliver()];
+      return [_buildScanningSliver(context)];
     }
     if (state is LocalMusicError) {
       return [_buildErrorSliver(state)];
@@ -168,7 +168,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
     return [const SliverToBoxAdapter(child: SizedBox.shrink())];
   }
 
-  Widget _buildLoadingSliver() {
+  Widget _buildLoadingSliver(BuildContext context) {
     return SliverFillRemaining(
       child: Center(
         child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
@@ -226,7 +226,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
     );
   }
 
-  Widget _buildScanningSliver() {
+  Widget _buildScanningSliver(BuildContext context) {
     return SliverFillRemaining(
       child: Center(
         child: Column(
