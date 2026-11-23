@@ -532,7 +532,7 @@ class _SuggestionsSliver extends StatelessWidget {
           final children = <Widget>[
             const SizedBox(height: 12),
             if (dbList.isNotEmpty) ...[
-              _buildSuggestionSectionHeader('Recent', Icons.history_rounded),
+              _buildSuggestionSectionHeader(context, 'Recent', Icons.history_rounded),
               ...dbList.asMap().entries.map((e) => _SuggestionTile(
                     suggestion: e.value,
                     icon: Icons.history_rounded,
@@ -561,7 +561,7 @@ class _SuggestionsSliver extends StatelessWidget {
             ],
             if (apiList.isNotEmpty) ...[
               _buildSuggestionSectionHeader(
-                  'Suggestions', Icons.search_rounded),
+                  context, 'Suggestions', Icons.search_rounded),
               ...apiList.asMap().entries.map((e) => _SuggestionTile(
                     suggestion: e.value,
                     icon: Icons.search_rounded,
@@ -575,7 +575,7 @@ class _SuggestionsSliver extends StatelessWidget {
             ],
             if (entityList.isNotEmpty) ...[
               _buildSuggestionSectionHeader(
-                  'Top Results', Icons.auto_awesome_rounded),
+                  context, 'Top Results', Icons.auto_awesome_rounded),
               ...entityList.asMap().entries.map((e) => _EntitySuggestionTile(
                     entity: e.value,
                     globalIndex: e.key + dbList.length + apiList.length,
@@ -601,7 +601,7 @@ class _SuggestionsSliver extends StatelessWidget {
     );
   }
 
-  Widget _buildSuggestionSectionHeader(String title, IconData icon) {
+  Widget _buildSuggestionSectionHeader(BuildContext context, String title, IconData icon) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 4, 10, 8),
       child: Row(
@@ -766,10 +766,10 @@ class _EntitySuggestionTile extends StatelessWidget {
           child: Row(
             children: [
               isArtist
-                  ? ClipOval(child: _buildThumb(thumbnailUrl))
+                  ? ClipOval(child: _buildThumb(context, thumbnailUrl))
                   : ClipRRect(
                       borderRadius: BorderRadius.circular(6),
-                      child: _buildThumb(thumbnailUrl)),
+                      child: _buildThumb(context, thumbnailUrl)),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -822,19 +822,19 @@ class _EntitySuggestionTile extends StatelessWidget {
     );
   }
 
-  Widget _buildThumb(String? url) {
+  Widget _buildThumb(BuildContext context, String? url) {
     if (url != null) {
       return CachedNetworkImage(
           imageUrl: url,
           width: 42,
           height: 42,
           fit: BoxFit.cover,
-          errorWidget: (_, __, ___) => _placeholder());
+          errorWidget: (_, __, ___) => _placeholder(context));
     }
-    return _placeholder();
+    return _placeholder(context);
   }
 
-  Widget _placeholder() => Container(
+  Widget _placeholder(BuildContext context) => Container(
       width: 42,
       height: 42,
       color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.15),
@@ -970,7 +970,7 @@ class _SliverSearchResults extends StatelessWidget {
             ),
           ),
         if (tracks.isNotEmpty) ...[
-          _sliverSectionHeader(AppLocalizations.of(context)!.searchTracks),
+          _sliverSectionHeader(context, AppLocalizations.of(context)!.searchTracks),
           SliverPadding(
             padding: const EdgeInsets.only(bottom: 12),
             sliver: SliverList(
@@ -997,19 +997,19 @@ class _SliverSearchResults extends StatelessWidget {
           ),
         ],
         if (albums.isNotEmpty) ...[
-          _sliverSectionHeader(AppLocalizations.of(context)!.searchAlbums),
+          _sliverSectionHeader(context, AppLocalizations.of(context)!.searchAlbums),
           _buildResponsiveGrid(albums
               .map((a) => AlbumCard(album: a, pluginId: pluginIdOf(a.id) ?? ''))
               .toList()),
         ],
         if (artists.isNotEmpty) ...[
-          _sliverSectionHeader(AppLocalizations.of(context)!.searchArtists),
+          _sliverSectionHeader(context, AppLocalizations.of(context)!.searchArtists),
           _buildResponsiveGrid(artists
               .map((a) => ArtistCard(artist: a, pluginId: pluginIdOf(a.id) ?? ''))
               .toList()),
         ],
         if (playlists.isNotEmpty) ...[
-          _sliverSectionHeader(AppLocalizations.of(context)!.searchPlaylists),
+          _sliverSectionHeader(context, AppLocalizations.of(context)!.searchPlaylists),
           _buildResponsiveGrid(playlists
               .map((p) => PlaylistCard(playlist: p, pluginId: pluginIdOf(p.id) ?? ''))
               .toList()),
@@ -1027,7 +1027,7 @@ class _SliverSearchResults extends StatelessWidget {
     );
   }
 
-  Widget _sliverSectionHeader(String title) {
+  Widget _sliverSectionHeader(BuildContext context, String title) {
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.only(left: 20, top: 20, bottom: 12),
