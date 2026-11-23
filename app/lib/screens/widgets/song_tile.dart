@@ -92,8 +92,8 @@ class SongCardWidget extends StatelessWidget {
                         child: Center(
                           child: AnimatedSwitcher(
                             duration: AppMotion.resolve(context, AppMotion.standard),
-                            switchInCurve: Curves.easeOutBack,
-                            switchOutCurve: Curves.easeIn,
+                            switchInCurve: AppMotion.enter,
+                            switchOutCurve: AppMotion.exit,
                             transitionBuilder: (child, animation) =>
                                 FadeTransition(
                               opacity: animation,
