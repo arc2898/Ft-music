@@ -12,6 +12,7 @@ import 'package:ft_music/screens/widgets/more_bottom_sheet.dart';
 import 'package:ft_music/screens/widgets/sign_board_widget.dart';
 import 'package:ft_music/screens/widgets/snackbar.dart';
 import 'package:ft_music/screens/widgets/song_tile.dart';
+import 'package:ft_music/screens/widgets/animated_list_item.dart';
 import 'package:ft_music/services/local_music_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -379,8 +380,10 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
           delegate: SliverChildBuilderDelegate(
             (context, index) {
               final track = displayedTracks[index];
-              return SongCardWidget(
+              return AnimatedListItem(
                 key: ValueKey('local-track-${track.id}'),
+                index: index,
+                child: SongCardWidget(
                 song: track,
                 showOptions: true,
                 onTap: () {
@@ -394,6 +397,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                   showMoreBottomSheet(context, track,
                       showDelete: true, onDelete: () => _handleDelete(track));
                 },
+              ),
               );
             },
             childCount: displayedTracks.length,
