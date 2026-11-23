@@ -1101,13 +1101,13 @@ class _NebulaBackground extends StatelessWidget {
         final colors = _getReactiveGradientColors(state);
         return AnimatedContainer(
           duration: AppMotion.resolve(context, AppMotion.background),
-          curve: Curves.easeOutCubic,
+          curve: AppMotion.enter,
           width: double.infinity,
           height: MediaQuery.of(context).size.height * 0.75,
           child: CustomPaint(
               painter: NebulaPainter(
-                  color1: colors[0].withValues(alpha: 0.18),
-                  color2: colors[1].withValues(alpha: 0.18))),
+                  color1: colors[0].withValues(alpha: Theme.of(context).brightness == Brightness.light ? 0.045 : 0.14),
+                  color2: colors[1].withValues(alpha: Theme.of(context).brightness == Brightness.light ? 0.045 : 0.14))),
         );
       },
     );
