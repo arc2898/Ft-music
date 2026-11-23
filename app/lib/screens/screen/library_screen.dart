@@ -20,6 +20,7 @@ import 'package:ft_music/core/constants/route_paths.dart';
 import 'package:ft_music/screens/widgets/create_playlist_bottomsheet.dart';
 import 'package:ft_music/screens/widgets/libitem_tile.dart';
 import 'package:ft_music/core/theme/app_theme.dart';
+import 'package:ft_music/core/theme/app_motion.dart';
 import 'package:ft_music/l10n/app_localizations.dart';
 import 'package:ft_music/blocs/library/search_cubit/library_search_cubit.dart';
 import 'package:ft_music/core/models/library_search_result.dart';
@@ -102,7 +103,7 @@ class _LibraryScreenViewState extends State<_LibraryScreenView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Default_Theme.themeColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: BlocBuilder<LibraryItemsCubit, LibraryItemsState>(
           builder: (context, itemsState) {
@@ -170,7 +171,7 @@ class _LibraryScreenViewState extends State<_LibraryScreenView> {
                               height: 16,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Default_Theme.accentColor1
+                                color: Theme.of(context).colorScheme.secondary
                                     .withValues(alpha: 0.6),
                               ),
                             ),
@@ -199,10 +200,10 @@ class _LibraryScreenViewState extends State<_LibraryScreenView> {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 12, vertical: 10),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.035),
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.035),
                                   borderRadius: BorderRadius.circular(14),
                                   border: Border.all(
-                                    color: Default_Theme.accentColor2
+                                    color: Theme.of(context).colorScheme.primary
                                         .withValues(alpha: 0.22),
                                   ),
                                 ),
@@ -212,13 +213,13 @@ class _LibraryScreenViewState extends State<_LibraryScreenView> {
                                       width: 28,
                                       height: 28,
                                       decoration: BoxDecoration(
-                                        color: Default_Theme.accentColor2
+                                        color: Theme.of(context).colorScheme.primary
                                             .withValues(alpha: 0.12),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Icon(
                                         Icons.drag_indicator_rounded,
-                                        color: Default_Theme.accentColor2
+                                        color: Theme.of(context).colorScheme.primary
                                             .withValues(alpha: 0.95),
                                         size: 16,
                                       ),
@@ -230,7 +231,7 @@ class _LibraryScreenViewState extends State<_LibraryScreenView> {
                                             .importReorderTip,
                                         style: Default_Theme.secondoryTextStyle
                                             .merge(TextStyle(
-                                          color: Default_Theme.primaryColor2
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant
                                               .withValues(alpha: 0.72),
                                           fontSize: 12,
                                           fontWeight: FontWeight.w500,
@@ -242,7 +243,7 @@ class _LibraryScreenViewState extends State<_LibraryScreenView> {
                                           setState(() => _isReordering = false),
                                       style: TextButton.styleFrom(
                                         foregroundColor:
-                                            Default_Theme.accentColor2,
+                                            Theme.of(context).colorScheme.primary,
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 10, vertical: 6),
                                         minimumSize: Size.zero,
@@ -283,12 +284,12 @@ class _LibraryScreenViewState extends State<_LibraryScreenView> {
 
   Widget _buildSearchBar() {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
+      duration: AppMotion.resolve(context, AppMotion.standard),
       curve: Curves.easeOutCubic,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Container(
         decoration: BoxDecoration(
-          color: Default_Theme.primaryColor1.withValues(alpha: 0.08),
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(12),
         ),
         child: TextField(
@@ -297,8 +298,8 @@ class _LibraryScreenViewState extends State<_LibraryScreenView> {
           autofocus: false,
           textInputAction: TextInputAction.search,
           style: Default_Theme.secondoryTextStyle.merge(
-            const TextStyle(
-              color: Default_Theme.primaryColor1,
+            TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 15,
             ),
           ),
@@ -306,27 +307,27 @@ class _LibraryScreenViewState extends State<_LibraryScreenView> {
             hintText: AppLocalizations.of(context)!.searchHintLibrary,
             hintStyle: Default_Theme.secondoryTextStyle.merge(
               TextStyle(
-                color: Default_Theme.primaryColor1.withValues(alpha: 0.4),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                 fontSize: 15,
               ),
             ),
             prefixIcon: Icon(
               Icons.search_rounded,
-              color: Default_Theme.primaryColor1.withValues(alpha: 0.5),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
               size: 20,
             ),
             suffixIcon: ValueListenableBuilder<String>(
               valueListenable: _searchQuery,
               builder: (context, query, _) {
                 return AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 150),
+                  duration: AppMotion.resolve(context, AppMotion.quick),
                   child: query.isEmpty
                       ? const SizedBox.shrink(key: ValueKey('empty'))
                       : IconButton(
                           key: const ValueKey('clear'),
                           icon: Icon(
                             Icons.close_rounded,
-                            color: Default_Theme.primaryColor1
+                            color: Theme.of(context).colorScheme.onSurface
                                 .withValues(alpha: 0.5),
                             size: 18,
                           ),
@@ -391,16 +392,16 @@ class _LibraryScreenViewState extends State<_LibraryScreenView> {
     return SliverAppBar(
       floating: true,
       pinned: false, // Set to false if you don't want it to stick at the top
-      surfaceTintColor: Default_Theme.themeColor,
-      backgroundColor: Default_Theme.themeColor,
+      surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       title: Row(
         children: [
           Text(
             AppLocalizations.of(context)!.libraryTitle,
             style: Default_Theme.primaryTextStyle.merge(
-              const TextStyle(
+              TextStyle(
                 fontSize: 34,
-                color: Default_Theme.primaryColor1,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -419,15 +420,15 @@ class _LibraryScreenViewState extends State<_LibraryScreenView> {
               _isSearching ? Icons.close_rounded : Icons.search_rounded,
               size: 24,
               color: _isSearching
-                  ? Default_Theme.accentColor2
-                  : Default_Theme.primaryColor1,
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.onSurface,
             ),
           ),
           IconButton(
             padding: const EdgeInsets.all(8),
             onPressed: () => createPlaylistDialog(context),
-            icon: const Icon(Icons.add_rounded,
-                size: 25, color: Default_Theme.primaryColor1),
+            icon: Icon(Icons.add_rounded,
+                size: 25, color: Theme.of(context).colorScheme.onSurface),
           ),
           IconButton(
             padding: const EdgeInsets.all(8),
@@ -446,8 +447,8 @@ class _LibraryScreenViewState extends State<_LibraryScreenView> {
                 context.pushNamed(RoutePaths.importMediaFromPlatforms);
               }
             },
-            icon: const Icon(Icons.file_upload_rounded,
-                size: 22, color: Default_Theme.primaryColor1),
+            icon: Icon(Icons.file_upload_rounded,
+                size: 22, color: Theme.of(context).colorScheme.onSurface),
           ),
         ],
       ),
@@ -599,17 +600,17 @@ class _ListOfPlaylists extends StatelessWidget {
                       height: 32,
                       decoration: BoxDecoration(
                         color:
-                            Default_Theme.accentColor2.withValues(alpha: 0.10),
+                            Theme.of(context).colorScheme.primary.withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: Default_Theme.accentColor2
+                          color: Theme.of(context).colorScheme.primary
                               .withValues(alpha: 0.20),
                         ),
                       ),
                       child: Icon(
                         Icons.drag_handle_rounded,
                         color:
-                            Default_Theme.accentColor2.withValues(alpha: 0.90),
+                            Theme.of(context).colorScheme.primary.withValues(alpha: 0.90),
                         size: 18,
                       ),
                     ),
@@ -638,14 +639,14 @@ Widget _proxyDecorator(Widget child, int index, Animation<double> animation) {
       final double elevation = lerpDouble(0, 6, animValue)!;
       return Material(
         elevation: elevation,
-        color: Default_Theme.themeColor,
+        color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(12),
-        shadowColor: Default_Theme.accentColor2.withValues(alpha: 0.25),
+        shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25),
         child: DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: Default_Theme.accentColor2.withValues(alpha: 0.20),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.20),
             ),
           ),
           child: child,
