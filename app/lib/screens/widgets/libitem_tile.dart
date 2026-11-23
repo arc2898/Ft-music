@@ -43,9 +43,9 @@ class LibItemCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: 8, right: 8),
       child: InkWell(
-        splashColor: Default_Theme.primaryColor2.withValues(alpha: 0.1),
-        hoverColor: Colors.white.withValues(alpha: 0.05),
-        highlightColor: Default_Theme.primaryColor2.withValues(alpha: 0.1),
+        splashColor: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.1),
+        hoverColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+        highlightColor: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(10),
         onTap: onTap ?? () {},
         onSecondaryTap: onSecondaryTap ?? () {},
@@ -69,7 +69,7 @@ class LibItemCard extends StatelessWidget {
                             padding: const EdgeInsets.only(left: 8),
                             child: Icon(
                               FontAwesome.chart_simple_solid,
-                              color: Default_Theme.primaryColor2
+                              color: Theme.of(context).colorScheme.onSurfaceVariant
                                   .withValues(alpha: 1),
                               size: 15,
                             ),
@@ -111,10 +111,10 @@ class LibItemCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       maxLines: 2,
                       style: Default_Theme.secondoryTextStyle.merge(
-                          const TextStyle(
+                          TextStyle(
                               fontSize: 16.5,
                               fontWeight: FontWeight.w700,
-                              color: Default_Theme.primaryColor1)),
+                              color: Theme.of(context).colorScheme.onSurface)),
                     ),
                     Row(
                       children: [
@@ -122,7 +122,7 @@ class LibItemCard extends StatelessWidget {
                           Icon(
                             MingCute.pin_2_fill,
                             size: 12,
-                            color: Default_Theme.accentColor2
+                            color: Theme.of(context).colorScheme.primary
                                 .withValues(alpha: 0.85),
                           ),
                           const SizedBox(width: 4),
@@ -132,11 +132,11 @@ class LibItemCard extends StatelessWidget {
                             subtitle,
                             maxLines: 1,
                             style: Default_Theme.secondoryTextStyle.merge(
-                                const TextStyle(
+                                TextStyle(
                                     fontSize: 14,
                                     overflow: TextOverflow.fade,
                                     fontWeight: FontWeight.w500,
-                                    color: Default_Theme.primaryColor1)),
+                                    color: Theme.of(context).colorScheme.onSurface)),
                           ),
                         ),
                       ],
@@ -154,7 +154,7 @@ class LibItemCard extends StatelessWidget {
                       Icons.more_vert_rounded,
                       size: 20,
                       color:
-                          Default_Theme.primaryColor1.withValues(alpha: 0.72),
+                          Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.72),
                     ),
                   ),
                 ),
