@@ -159,7 +159,7 @@ class _LibraryScreenViewState extends State<_LibraryScreenView> {
                     customDiscoverBar(context),
                     if (_isSearching)
                       SliverToBoxAdapter(
-                        child: _buildSearchBar(),
+                        child: _buildSearchBar(context),
                       ),
                     if (isLoading)
                       SliverToBoxAdapter(
@@ -282,7 +282,7 @@ class _LibraryScreenViewState extends State<_LibraryScreenView> {
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(BuildContext context) {
     return AnimatedContainer(
       duration: AppMotion.resolve(context, AppMotion.standard),
       curve: Curves.easeOutCubic,
