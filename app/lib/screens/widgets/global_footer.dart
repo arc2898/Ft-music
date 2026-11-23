@@ -181,7 +181,11 @@ class _AnimatedPageViewState extends State<_AnimatedPageView>
     super.didUpdateWidget(oldWidget);
     if (widget.navigationShell.currentIndex != _previousIndex) {
       _previousIndex = widget.navigationShell.currentIndex;
-      _animationController.forward(from: 0.0);
+      if (AppMotion.reduceMotion(context)) {
+        _animationController.value = 1;
+      } else {
+        _animationController.forward(from: 0.0);
+      }
     }
   }
 
