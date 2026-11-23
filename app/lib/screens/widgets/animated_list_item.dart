@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:ft_music/core/theme/app_motion.dart';
 
-/// Reusable animated list item with fade-in and slide-up effect
+/// Staggered enter transition shared by library and search result lists.
+/// Uses short, capped delays and respects the platform reduced-motion setting.
 class AnimatedListItem extends StatelessWidget {
   final int index;
   final Widget child;
@@ -13,16 +15,23 @@ class AnimatedListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final stagger = (index.clamp(0, 12) * 16);
+    final duration = AppMotion.resolve(
+      context,
+      Duration(milliseconds: AppMotion.standard.inMilliseconds + stagger),
+    );
     return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: Duration(milliseconds: 250 + (index * 30).clamp(0, 200)),
-      curve: Curves.easeOutQuart,
-      builder: (context, value, child) {
+      tween: Tween(begin: 0, end: 1),
+      duration: duration,
+      curve: AppMotion.emphasized,
+      builder: (context, progress, child) {
+        final offset = AppMotion.reduceMotion(context) ? 0.0 : 10 * (1 - progress);
+        final scale = AppMotion.reduceMotion(context) ? 1.0 : .992 + (.008 * progress);
         return Opacity(
-          opacity: value,
+          opacity: progress,
           child: Transform.translate(
-            offset: Offset(0, 16 * (1 - value)),
-            child: child,
+            offset: Offset(0, offset),
+            child: Transform.scale(scale: scale, child: child),
           ),
         );
       },
