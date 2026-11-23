@@ -384,20 +384,24 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                 key: ValueKey('local-track-${track.id}'),
                 index: index,
                 child: SongCardWidget(
-                song: track,
-                showOptions: true,
-                onTap: () {
-                  context.read<BloomeePlayerCubit>().bloomeePlayer.loadPlaylist(
-                        Playlist(tracks: displayedTracks, title: 'Local Music'),
-                        idx: index,
-                        doPlay: true,
-                      );
-                },
-                onOptionsTap: () {
-                  showMoreBottomSheet(context, track,
-                      showDelete: true, onDelete: () => _handleDelete(track));
-                },
-              ),
+                  song: track,
+                  showOptions: true,
+                  onTap: () {
+                    context.read<BloomeePlayerCubit>().bloomeePlayer.loadPlaylist(
+                          Playlist(tracks: displayedTracks, title: 'Local Music'),
+                          idx: index,
+                          doPlay: true,
+                        );
+                  },
+                  onOptionsTap: () {
+                    showMoreBottomSheet(
+                      context,
+                      track,
+                      showDelete: true,
+                      onDelete: () => _handleDelete(track),
+                    );
+                  },
+                ),
               );
             },
             childCount: displayedTracks.length,
