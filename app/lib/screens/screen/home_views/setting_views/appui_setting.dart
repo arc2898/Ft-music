@@ -65,7 +65,6 @@ class AppUISettings extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Default_Theme.themeColor,
       appBar: AppBar(
