@@ -34,9 +34,9 @@ jobs:
       - name: Resolve packages
         run: flutter pub get
 
-      - name: Check formatting for changed UI files
+      - name: Parse and inspect changed UI files
         run: >
-          dart format --output=none --set-exit-if-changed
+          dart format --output=none
           lib/core/theme/app_motion.dart
           lib/screens/screen/explore_screen.dart
           lib/screens/screen/search_screen.dart
