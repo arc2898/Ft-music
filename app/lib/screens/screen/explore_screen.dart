@@ -194,7 +194,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                     height: 60,
                                     width: 60,
                                     child: CircularProgressIndicator(
-                                      color: Default_Theme.accentColor2,
+                                      color: Theme.of(context).colorScheme.primary,
                                     ),
                                   ),
                                 );
@@ -357,7 +357,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                   padding: EdgeInsets.symmetric(vertical: 40),
                                   child: Center(
                                     child: CircularProgressIndicator(
-                                      color: Default_Theme.accentColor2,
+                                      color: Theme.of(context).colorScheme.primary,
                                     ),
                                   ),
                                 );
