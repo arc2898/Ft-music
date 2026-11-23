@@ -986,18 +986,21 @@ class _SliverSearchResults extends StatelessWidget {
                     key: ValueKey('search-track-${track.id}'),
                     index: index,
                     child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-                    child: SongCardWidget(
-                      song: track,
-                      onTap: () => context
-                          .read<BloomeePlayerCubit>()
-                          .bloomeePlayer
-                          .updateQueueTracks([track], doPlay: true),
-                      onOptionsTap: () => showMoreBottomSheet(context, track,
-                          showSinglePlay: true),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                      child: SongCardWidget(
+                        song: track,
+                        onTap: () => context
+                            .read<BloomeePlayerCubit>()
+                            .bloomeePlayer
+                            .updateQueueTracks([track], doPlay: true),
+                        onOptionsTap: () => showMoreBottomSheet(
+                          context,
+                          track,
+                          showSinglePlay: true,
+                        ),
+                      ),
                     ),
-                  ),
                   );
                 },
                 childCount: tracks.length,
