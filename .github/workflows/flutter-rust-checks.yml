@@ -1,0 +1,79 @@
+name: Flutter and Rust checks
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flutter:
+    name: Flutter analyze and tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.4'
+          channel: stable
+          cache: true
+
+      - name: Resolve packages
+        run: flutter pub get
+
+      - name: Check formatting for changed UI files
+        run: >
+          dart format --output=none --set-exit-if-changed
+          lib/core/theme/app_motion.dart
+          lib/screens/screen/explore_screen.dart
+          lib/screens/screen/search_screen.dart
+          lib/screens/screen/local_music_screen.dart
+          lib/screens/screen/library_screen.dart
+          lib/screens/widgets/song_tile.dart
+          lib/screens/widgets/libitem_tile.dart
+          lib/screens/widgets/global_footer.dart
+          lib/screens/widgets/animated_list_item.dart
+          test/app_motion_test.dart
+
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
+
+      - name: Run tests
+        run: flutter test
+
+  rust:
+    name: Rust format, check and tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app/rust
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Check crate
+        run: cargo check --locked
+
+      - name: Run tests
+        run: cargo test --locked
