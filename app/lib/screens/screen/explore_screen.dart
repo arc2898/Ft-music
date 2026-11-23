@@ -15,7 +15,6 @@ import 'package:ft_music/plugins/blocs/plugin/plugin_bloc.dart';
 import 'package:ft_music/plugins/blocs/plugin/plugin_state.dart';
 import 'package:ft_music/screens/screen/home_views/recents_view.dart';
 import 'package:ft_music/screens/screen/offline_screen.dart';
-import 'package:ft_music/screens/screen/chart/carousal_widget.dart';
 import 'package:ft_music/screens/widgets/more_bottom_sheet.dart';
 import 'package:ft_music/screens/widgets/sign_board_widget.dart';
 import 'package:ft_music/screens/widgets/song_tile.dart';
@@ -27,7 +26,6 @@ import 'package:ft_music/l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../widgets/horizontal_card_view.dart';
 import '../widgets/tab_list_widget.dart';
-import '../widgets/home_category_carousel.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -184,8 +182,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 SliverList(
                   delegate: SliverChildListDelegate(
                     [
-                      const CaraouselWidget(),
-                      const HomeCategoryCarousel(),
                       const _HomeOfflineSummaryCard(),
                       Padding(
                         padding: const EdgeInsets.only(top: 15.0),
