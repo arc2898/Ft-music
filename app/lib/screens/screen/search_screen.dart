@@ -24,6 +24,7 @@ import 'package:ft_music/screens/widgets/more_bottom_sheet.dart';
 import 'package:ft_music/screens/widgets/playlist_card.dart';
 import 'package:ft_music/screens/widgets/sign_board_widget.dart';
 import 'package:ft_music/screens/widgets/song_tile.dart';
+import 'package:ft_music/screens/widgets/animated_list_item.dart';
 import 'package:ft_music/src/rust/api/plugin/commands.dart';
 import 'package:ft_music/src/rust/api/plugin/models.dart' as plugin_models;
 import 'package:ft_music/plugins/utils/media_id.dart';
@@ -981,7 +982,10 @@ class _SliverSearchResults extends StatelessWidget {
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
                   final track = tracks[index];
-                  return Padding(
+                  return AnimatedListItem(
+                    key: ValueKey('search-track-${track.id}'),
+                    index: index,
+                    child: Padding(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
                     child: SongCardWidget(
@@ -993,6 +997,7 @@ class _SliverSearchResults extends StatelessWidget {
                       onOptionsTap: () => showMoreBottomSheet(context, track,
                           showSinglePlay: true),
                     ),
+                  ),
                   );
                 },
                 childCount: tracks.length,
