@@ -15,6 +15,8 @@ class AnimatedListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (AppMotion.reduceMotion(context)) return child;
+
     final stagger = (index.clamp(0, 12) * 16);
     final duration = AppMotion.resolve(
       context,
@@ -25,8 +27,8 @@ class AnimatedListItem extends StatelessWidget {
       duration: duration,
       curve: AppMotion.emphasized,
       builder: (context, progress, child) {
-        final offset = AppMotion.reduceMotion(context) ? 0.0 : 10 * (1 - progress);
-        final scale = AppMotion.reduceMotion(context) ? 1.0 : .992 + (.008 * progress);
+        final offset = 10 * (1 - progress);
+        final scale = .992 + (.008 * progress);
         return Opacity(
           opacity: progress,
           child: Transform.translate(
