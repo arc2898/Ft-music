@@ -212,7 +212,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                     AppLocalizations.of(context)!.localMusicGrantPermission),
                 style: FilledButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.white,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -338,7 +338,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                           AppLocalizations.of(context)!.localMusicAddFolder),
                       style: FilledButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Colors.white,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 24, vertical: 12),
                       ),
@@ -522,6 +522,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
       titleSpacing: 16,
       title: AnimatedSwitcher(
         duration: AppMotion.resolve(context, AppMotion.standard),
+        transitionBuilder: AppMotion.fadeSlideTransition,
         child: _isSearch
             ? TextField(
                 key: const ValueKey('search'),
