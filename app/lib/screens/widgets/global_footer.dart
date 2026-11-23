@@ -145,7 +145,7 @@ class _AnimatedPageViewState extends State<_AnimatedPageView>
     with SingleTickerProviderStateMixin {
   late final AnimationController _animationController;
   late final Animation<double> _fadeAnimation;
-  late final Animation<double> _scaleAnimation;
+  late final Animation<Offset> _slideAnimation;
   int _previousIndex = 0;
 
   @override
@@ -154,7 +154,7 @@ class _AnimatedPageViewState extends State<_AnimatedPageView>
     _previousIndex = widget.navigationShell.currentIndex;
 
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 250),
+      duration: AppMotion.page,
       vsync: this,
     );
 
@@ -163,10 +163,13 @@ class _AnimatedPageViewState extends State<_AnimatedPageView>
       curve: Curves.easeOutCubic,
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.96, end: 1.0).animate(
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.018),
+      end: Offset.zero,
+    ).animate(
       CurvedAnimation(
         parent: _animationController,
-        curve: Curves.easeOutCubic,
+        curve: AppMotion.enter,
       ),
     );
 
@@ -190,10 +193,12 @@ class _AnimatedPageViewState extends State<_AnimatedPageView>
 
   @override
   Widget build(BuildContext context) {
+    if (AppMotion.reduceMotion(context)) return widget.navigationShell;
+
     return FadeTransition(
       opacity: _fadeAnimation,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
+      child: SlideTransition(
+        position: _slideAnimation,
         child: widget.navigationShell,
       ),
     );
@@ -328,7 +333,12 @@ class _BottomNavItem extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: color, size: selected ? 22 : 21),
+              AnimatedScale(
+                scale: selected ? 1.06 : 1,
+                duration: AppMotion.resolve(context, AppMotion.quick),
+                curve: AppMotion.enter,
+                child: Icon(icon, color: color, size: selected ? 22 : 21),
+              ),
               const SizedBox(height: 3),
               Text(
                 label,
