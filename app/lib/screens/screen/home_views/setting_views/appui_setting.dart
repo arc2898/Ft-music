@@ -1,6 +1,5 @@
 import 'package:ft_music/core/theme/app_theme.dart';
 import 'package:ft_music/blocs/settings_cubit/cubit/settings_cubit.dart';
-import 'package:ft_music/l10n/app_localizations.dart';
 import 'package:ft_music/screens/screen/search_screen.dart';
 import 'package:ft_music/screens/screen/home_views/setting_views/setting_shared_widgets.dart';
 import 'package:flutter/material.dart';
