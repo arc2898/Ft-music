@@ -285,7 +285,7 @@ class _LibraryScreenViewState extends State<_LibraryScreenView> {
   Widget _buildSearchBar(BuildContext context) {
     return AnimatedContainer(
       duration: AppMotion.resolve(context, AppMotion.standard),
-      curve: Curves.easeOutCubic,
+      curve: AppMotion.enter,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Container(
         decoration: BoxDecoration(
@@ -321,6 +321,7 @@ class _LibraryScreenViewState extends State<_LibraryScreenView> {
               builder: (context, query, _) {
                 return AnimatedSwitcher(
                   duration: AppMotion.resolve(context, AppMotion.quick),
+                  transitionBuilder: AppMotion.fadeSlideTransition,
                   child: query.isEmpty
                       ? const SizedBox.shrink(key: ValueKey('empty'))
                       : IconButton(
