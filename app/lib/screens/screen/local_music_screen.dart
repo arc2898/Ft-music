@@ -5,6 +5,7 @@ import 'package:ft_music/blocs/media_player/bloomee_player_cubit.dart';
 import 'package:ft_music/core/models/exported.dart';
 import 'package:ft_music/core/models/media_playlist_model.dart';
 import 'package:ft_music/core/theme/app_theme.dart';
+import 'package:ft_music/core/theme/app_motion.dart';
 import 'package:ft_music/l10n/app_localizations.dart';
 import 'package:ft_music/screens/widgets/bloomee_ui_kit/bloomee_dialog.dart';
 import 'package:ft_music/screens/widgets/more_bottom_sheet.dart';
@@ -128,7 +129,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Default_Theme.themeColor,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: BlocConsumer<LocalMusicCubit, LocalMusicState>(
           listener: (context, state) {
             if (state is LocalMusicLoaded) {
@@ -168,9 +169,9 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
   }
 
   Widget _buildLoadingSliver() {
-    return const SliverFillRemaining(
+    return SliverFillRemaining(
       child: Center(
-        child: CircularProgressIndicator(color: Default_Theme.accentColor2),
+        child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
       ),
     );
   }
@@ -184,13 +185,13 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.shield_outlined,
-                  color: Default_Theme.primaryColor2.withValues(alpha: 0.5),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                   size: 64),
               const SizedBox(height: 20),
               Text(
                   AppLocalizations.of(context)!.localMusicStorageAccessRequired,
-                  style: const TextStyle(
-                      color: Default_Theme.primaryColor1,
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 20,
                       fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
@@ -198,7 +199,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                 AppLocalizations.of(context)!.localMusicStorageAccessDesc,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    color: Default_Theme.primaryColor2.withValues(alpha: 0.7),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                     fontSize: 14,
                     height: 1.4),
               ),
@@ -210,7 +211,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                 label: Text(
                     AppLocalizations.of(context)!.localMusicGrantPermission),
                 style: FilledButton.styleFrom(
-                  backgroundColor: Default_Theme.accentColor2,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Colors.white,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
@@ -231,11 +232,11 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircularProgressIndicator(color: Default_Theme.accentColor2),
+            CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 20),
             Text(AppLocalizations.of(context)!.localMusicScanning,
-                style: const TextStyle(
-                    color: Default_Theme.primaryColor2,
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 15,
                     fontWeight: FontWeight.w500)),
           ],
@@ -278,7 +279,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
               Text(
                 '${AppLocalizations.of(context)!.localMusicTrackCount(displayedTracks.length)}',
                 style: TextStyle(
-                    color: Default_Theme.primaryColor2.withValues(alpha: 0.6),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                     fontSize: 13),
               ),
               const Spacer(),
@@ -336,7 +337,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                       label: Text(
                           AppLocalizations.of(context)!.localMusicAddFolder),
                       style: FilledButton.styleFrom(
-                        backgroundColor: Default_Theme.accentColor2,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 24, vertical: 12),
@@ -348,10 +349,10 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                   icon: const Icon(MingCute.refresh_2_line, size: 20),
                   label: Text(AppLocalizations.of(context)!.localMusicScanNow),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Default_Theme.primaryColor1,
+                    foregroundColor: Theme.of(context).colorScheme.onSurface,
                     side: BorderSide(
                         color:
-                            Default_Theme.primaryColor2.withValues(alpha: 0.2)),
+                            Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.2)),
                     padding: const EdgeInsets.symmetric(
                         horizontal: 24, vertical: 12),
                   ),
@@ -415,8 +416,8 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
           children: [
             Text(
               AppLocalizations.of(context)!.localMusicFolders,
-              style: const TextStyle(
-                color: Default_Theme.primaryColor1,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -434,11 +435,11 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                         horizontal: 14, vertical: 12),
                     decoration: BoxDecoration(
                       color:
-                          Default_Theme.primaryColor2.withValues(alpha: 0.04),
+                          Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.04),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color:
-                            Default_Theme.primaryColor2.withValues(alpha: 0.08),
+                            Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.08),
                       ),
                     ),
                     child: Row(
@@ -446,7 +447,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                       children: [
                         Icon(
                           MingCute.folder_2_fill,
-                          color: Default_Theme.primaryColor2
+                          color: Theme.of(context).colorScheme.onSurfaceVariant
                               .withValues(alpha: 0.6),
                           size: 22,
                         ),
@@ -460,8 +461,8 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                                 p.basename(folder),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: Default_Theme.primaryColor1,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onSurface,
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -472,7 +473,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  color: Default_Theme.primaryColor2
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant
                                       .withValues(alpha: 0.5),
                                   fontSize: 11,
                                 ),
@@ -490,7 +491,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
                           icon: Icon(
                             MingCute.close_line,
                             size: 18,
-                            color: Default_Theme.primaryColor2
+                            color: Theme.of(context).colorScheme.onSurfaceVariant
                                 .withValues(alpha: 0.6),
                           ),
                           style: IconButton.styleFrom(
@@ -516,35 +517,35 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
       floating: true,
       pinned: false,
       surfaceTintColor: Colors.transparent,
-      backgroundColor: Default_Theme.themeColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       automaticallyImplyLeading: false,
       titleSpacing: 16,
       title: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 250),
+        duration: AppMotion.resolve(context, AppMotion.standard),
         child: _isSearch
             ? TextField(
                 key: const ValueKey('search'),
                 controller: _searchController,
                 autofocus: true,
-                cursorColor: Default_Theme.primaryColor1,
+                cursorColor: Theme.of(context).colorScheme.onSurface,
                 decoration: InputDecoration(
                   hintText: AppLocalizations.of(context)!.localMusicSearchHint,
                   border: InputBorder.none,
                   hintStyle: TextStyle(
                       color:
-                          Default_Theme.primaryColor1.withValues(alpha: 0.4)),
+                          Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
                 ),
-                style: Default_Theme.secondoryTextStyle.merge(const TextStyle(
-                    color: Default_Theme.primaryColor1, fontSize: 16.0)),
+                style: Default_Theme.secondoryTextStyle.merge(TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface, fontSize: 16.0)),
               )
             : Row(
                 key: const ValueKey('title'),
                 children: [
                   Text(AppLocalizations.of(context)!.localMusicTitle,
                       style: Default_Theme.primaryTextStyle.merge(
-                          const TextStyle(
+                          TextStyle(
                               fontSize: 34,
-                              color: Default_Theme.primaryColor1,
+                              color: Theme.of(context).colorScheme.onSurface,
                               fontWeight: FontWeight.w700))),
                   const Spacer(),
                 ],
@@ -554,15 +555,15 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
         if (!_isSearch && state is LocalMusicLoaded)
           IconButton(
             tooltip: AppLocalizations.of(context)!.localMusicRescanDevice,
-            icon: const Icon(MingCute.refresh_2_line,
-                color: Default_Theme.primaryColor1),
+            icon: Icon(MingCute.refresh_2_line,
+                color: Theme.of(context).colorScheme.onSurface),
             onPressed: () => context.read<LocalMusicCubit>().scan(),
           ),
         if (!_isSearch && !LocalMusicService.isMobile)
           IconButton(
             tooltip: AppLocalizations.of(context)!.localMusicAddFolder,
-            icon: const Icon(MingCute.new_folder_line,
-                color: Default_Theme.primaryColor1),
+            icon: Icon(MingCute.new_folder_line,
+                color: Theme.of(context).colorScheme.onSurface),
             onPressed: () =>
                 context.read<LocalMusicCubit>().addFolderViaPicker(),
           ),
@@ -571,7 +572,7 @@ class _LocalMusicScreenState extends State<LocalMusicScreen> {
               ? AppLocalizations.of(context)!.localMusicCloseSearch
               : AppLocalizations.of(context)!.localMusicOpenSearch,
           icon: Icon(_isSearch ? Icons.close : MingCute.search_2_line,
-              color: Default_Theme.primaryColor1),
+              color: Theme.of(context).colorScheme.onSurface),
           onPressed: _toggleSearch,
         ),
         const SizedBox(width: 8),
@@ -591,7 +592,7 @@ class _ActionChipButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Default_Theme.accentColor2.withValues(alpha: 0.12),
+      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
@@ -601,11 +602,11 @@ class _ActionChipButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 16, color: Default_Theme.accentColor2),
+              Icon(icon, size: 16, color: Theme.of(context).colorScheme.primary),
               const SizedBox(width: 6),
               Text(label,
-                  style: const TextStyle(
-                      color: Default_Theme.accentColor2,
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
                       fontSize: 13,
                       fontWeight: FontWeight.w600)),
             ],
@@ -653,7 +654,7 @@ class _DeleteConfirmDialogState extends State<_DeleteConfirmDialog> {
             Text(
               AppLocalizations.of(context)!.dialogDeleteTrackLinkedPlaylists,
               style: TextStyle(
-                color: Default_Theme.primaryColor2.withValues(alpha: 0.7),
+                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
@@ -671,10 +672,10 @@ class _DeleteConfirmDialogState extends State<_DeleteConfirmDialog> {
                       ),
                       decoration: BoxDecoration(
                         color:
-                            Default_Theme.primaryColor2.withValues(alpha: 0.05),
+                            Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: Default_Theme.primaryColor2
+                          color: Theme.of(context).colorScheme.onSurfaceVariant
                               .withValues(alpha: 0.1),
                         ),
                       ),
@@ -683,13 +684,13 @@ class _DeleteConfirmDialogState extends State<_DeleteConfirmDialog> {
                         children: [
                           Icon(MingCute.playlist_2_line,
                               size: 14,
-                              color: Default_Theme.primaryColor2
+                              color: Theme.of(context).colorScheme.onSurfaceVariant
                                   .withValues(alpha: 0.8)),
                           const SizedBox(width: 6),
                           Text(
                             playlist,
-                            style: const TextStyle(
-                              color: Default_Theme.primaryColor1,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),
@@ -710,12 +711,12 @@ class _DeleteConfirmDialogState extends State<_DeleteConfirmDialog> {
                 child: Checkbox(
                   value: _dontAskAgain,
                   onChanged: (v) => setState(() => _dontAskAgain = v ?? false),
-                  activeColor: Default_Theme.accentColor2,
+                  activeColor: Theme.of(context).colorScheme.primary,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4)),
                   side: BorderSide(
                       color:
-                          Default_Theme.primaryColor2.withValues(alpha: 0.5)),
+                          Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
                 ),
               ),
               const SizedBox(width: 12),
@@ -724,7 +725,7 @@ class _DeleteConfirmDialogState extends State<_DeleteConfirmDialog> {
                 child: Text(AppLocalizations.of(context)!.dialogDontAskAgain,
                     style: TextStyle(
                         color:
-                            Default_Theme.primaryColor2.withValues(alpha: 0.8),
+                            Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
                         fontSize: 14)),
               ),
             ],
@@ -737,7 +738,7 @@ class _DeleteConfirmDialogState extends State<_DeleteConfirmDialog> {
                 onPressed: () => Navigator.pop(context),
                 style: TextButton.styleFrom(
                   foregroundColor:
-                      Default_Theme.primaryColor2.withValues(alpha: 0.72),
+                      Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
                   textStyle: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
