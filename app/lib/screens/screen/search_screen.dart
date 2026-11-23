@@ -653,7 +653,9 @@ class _SuggestionTile extends StatelessWidget {
           valueListenable: highlightedIndexNotifier,
           builder: (context, highlightedIndex, child) {
             final isHighlighted = highlightedIndex == globalIndex;
-            return Container(
+            return AnimatedContainer(
+              duration: AppMotion.resolve(context, AppMotion.quick),
+              curve: AppMotion.enter,
               margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
               decoration: BoxDecoration(
@@ -747,7 +749,9 @@ class _EntitySuggestionTile extends StatelessWidget {
           valueListenable: highlightedIndexNotifier,
           builder: (context, highlightedIndex, child) {
             final isHighlighted = highlightedIndex == globalIndex;
-            return Container(
+            return AnimatedContainer(
+              duration: AppMotion.resolve(context, AppMotion.quick),
+              curve: AppMotion.enter,
               margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
